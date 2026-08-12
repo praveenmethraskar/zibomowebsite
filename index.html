@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Zibomo Smart Lockers — the complete locker solution. Cloud-based software, industry-grade hardware and 24/7 support for logistics, residential, e-commerce, laundry and campus environments.">
+  <meta name="theme-color" content="#0A1638">
+  <title>Zibomo — Smart Lockers for a Modern World</title>
+
+  <!-- Flags that JS is alive BEFORE first paint. css/style.css only hides
+       scroll-reveal elements under `.js`, so a JS-less or broken-JS visit
+       renders the full page instead of a blank one — and there is no flash
+       of visible content because the class lands before the body renders. -->
+  <script>document.documentElement.className += ' js';</script>
+
+  <link rel="shortcut icon" type="image/x-icon" href="assets/images/brand-favicon.ico">
+
+  <!-- Fonts: Poppins (body, matches brand) + Space Grotesk (display headings) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- ==========  FRAMEWORK 1: BOOTSTRAP 5 — grid, navbar, carousel, tabs, modal  ========== -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- ==========  FRAMEWORK 2: TAILWIND CSS — fine-grained utility styling  ==========
+       Conflict-avoidance strategy (both frameworks live in the same document):
+         1. prefix: 'tw-'  → every Tailwind class is namespaced, so utilities can never
+            collide with a Bootstrap class name (e.g. Bootstrap `.border` vs `tw-border`).
+         2. preflight: false → Tailwind's base reset is disabled so it cannot overwrite
+            Bootstrap's Reboot. The few base defaults Tailwind's own border utilities
+            depend on are restored manually in css/style.css (see "Framework bridge").
+       NOTE: with a prefix, responsive variants are written `md:tw-flex`, NOT `tw-md:flex`.
+  -->
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      prefix: 'tw-',
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          colors: {
+            brand:      '#E8112D',  /* Zibomo red   */
+            'brand-dk': '#B80C22',
+            navy:       '#0A1638',  /* Zibomo navy  */
+            'navy-700': '#0F1F4B',
+            'navy-500': '#1A2F6B'
+          },
+          fontFamily: {
+            sans:    ['Poppins', 'system-ui', 'sans-serif'],
+            display: ['"Space Grotesk"', 'Poppins', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- ==========  CUSTOM STYLES — brand tokens + every animated / JS-toggled state  ========== -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<!-- Bootstrap's data-bs-spy="scroll" is deliberately NOT used here: it would
+     fight main.js over the .active class on the nav links, and it cannot
+     account for the navbar's changing height as it shrinks on scroll.
+     Module 05 in js/main.js handles scrollspy instead. -->
+<body>
+
+<!-- ============================================================
+     PRELOADER
+     ============================================================ -->
+<div id="preloader" aria-hidden="true">
+  <div class="preloader__box">
+    <span></span><span></span><span></span><span></span>
+  </div>
+  <p class="preloader__text">zibomo</p>
+</div>
+
+<!-- Scroll progress indicator (width driven by main.js) -->
+<div id="scrollProgress" role="presentation"></div>
+
+<!-- ============================================================
+     SECTION: NAVBAR  (Bootstrap navbar + collapse, Tailwind spacing)
+     ============================================================ -->
+<nav id="mainNav" class="navbar navbar-expand-lg fixed-top site-nav">
+  <div class="container">
+
+    <!-- Brand -->
+    <a class="navbar-brand tw-flex tw-items-center tw-gap-2" href="#header">
+      <img src="assets/images/brand-logo.png" alt="Zibomo — Sprint Safe" width="150" height="45" class="site-nav__logo">
+    </a>
+
+    <!-- Mobile toggler -->
+    <button class="navbar-toggler site-nav__toggler" type="button"
+            data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="site-nav__bar"></span>
+      <span class="site-nav__bar"></span>
+      <span class="site-nav__bar"></span>
+    </button>
+
+    <!-- Links -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav tw-ms-auto lg:tw-items-center tw-gap-1 lg:tw-gap-0">
+        <li class="nav-item"><a class="nav-link nav-link--anim active" href="#header">Home</a></li>
+        <li class="nav-item"><a class="nav-link nav-link--anim" href="#useCases">Use Cases</a></li>
+        <li class="nav-item"><a class="nav-link nav-link--anim" href="#whoAreWe">Who we are</a></li>
+        <li class="nav-item"><a class="nav-link nav-link--anim" href="#Features">Features &amp; Benefits</a></li>
+        <li class="nav-item"><a class="nav-link nav-link--anim" href="#product">Product</a></li>
+        <li class="nav-item"><a class="nav-link nav-link--anim" href="#collaboration">Collaboration</a></li>
+        <li class="nav-item"><a class="nav-link nav-link--anim" href="#contact">Contact Us</a></li>
+        <li class="nav-item tw-mt-3 lg:tw-mt-0 lg:tw-ms-3">
+          <a href="#contact" class="btn-zb btn-zb--solid tw-w-full lg:tw-w-auto">
+            Get a Quote <i class="bi bi-arrow-right-short"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================================================
+     SECTION: HERO  (Bootstrap carousel — 5 rotating headlines from the brand deck)
+     ============================================================ -->
+<header id="header" class="hero">
+
+  <!-- Background banner carousel + layered gradient wash.
+       Two slides cross-fade behind the headline. main.js (module 10) advances
+       them in step with the headline carousel below, so one timer drives both
+       and they can never drift apart. Slide 1 carries .is-active in the markup,
+       so the background is correct even before JavaScript runs. -->
+  <div class="hero__media" aria-hidden="true">
+    <div class="hero__slide is-active">
+      <img src="assets/images/hero-banner1-1920.jpg"
+           srcset="assets/images/hero-banner1-1200.jpg 1200w, assets/images/hero-banner1-1920.jpg 1920w"
+           sizes="100vw"
+           alt="" width="1920" height="1080" fetchpriority="high" decoding="async">
+    </div>
+    <div class="hero__slide">
+      <img src="assets/images/hero-banner2-1920.jpg"
+           srcset="assets/images/hero-banner2-1200.jpg 1200w, assets/images/hero-banner2-1920.jpg 1920w"
+           sizes="100vw"
+           alt="" width="1920" height="1080" decoding="async">
+    </div>
+  </div>
+  <div class="hero__scrim" aria-hidden="true"></div>
+  <div class="hero__grid" aria-hidden="true"></div>
+  <!-- Decorative floating orbs, animated in style.css -->
+  <span class="orb orb--1" aria-hidden="true"></span>
+  <span class="orb orb--2" aria-hidden="true"></span>
+
+  <div class="container hero__inner">
+    <div class="row tw-items-center">
+      <div class="col-lg-8 col-xl-7">
+
+        <p class="hero__eyebrow" data-reveal="fade-down">
+          <span class="hero__pulse"></span> Business Process Automation · Smart Locker Systems
+        </p>
+
+        <!-- Bootstrap carousel: slide 1 is the primary headline, slides 2–5 rotate the
+             supporting brand statements exactly as the original hero does. -->
+        <div id="heroCarousel" class="carousel slide hero__carousel" data-bs-ride="carousel"
+             data-bs-interval="5200" data-bs-pause="hover">
+
+          <div class="carousel-inner">
+            <!-- Slide 1 -->
+            <div class="carousel-item active">
+              <h1 class="hero__title">Smart Lockers for <span class="txt-grad">a modern world</span></h1>
+              <p class="hero__sub">The complete locker solution.</p>
+            </div>
+            <!-- Slide 2 -->
+            <div class="carousel-item">
+              <h1 class="hero__title">Your <span class="txt-grad">On-demand</span> Storage Solution</h1>
+              <p class="hero__sub">Convenient, tech-enabled access, automated delivery notifications
+                and audit-friendly tracking.</p>
+            </div>
+            <!-- Slide 3 -->
+            <div class="carousel-item">
+              <h1 class="hero__title">Smart <span class="txt-grad">Automated</span> Locker Systems</h1>
+              <p class="hero__sub">Built with advanced digital technology beyond the simple keyless
+                entry — fully integrated reporting and real-time management.</p>
+            </div>
+            <!-- Slide 4 -->
+            <div class="carousel-item">
+              <h1 class="hero__title">Exceptional quality at <span class="txt-grad">exceptional prices</span></h1>
+              <p class="hero__sub">Industry-grade heavy-gauge steel lockers, backed by an
+                industry-leading robust cloud platform.</p>
+            </div>
+            <!-- Slide 5 -->
+            <div class="carousel-item">
+              <h1 class="hero__title"><span class="txt-grad">Security</span> and Convenience</h1>
+              <p class="hero__sub">Completely touchless transactions with a complete and
+                secured chain of custody.</p>
+            </div>
+          </div>
+
+          <!-- Carousel controls -->
+          <div class="hero__controls">
+            <button class="hero__ctrl" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+              <i class="bi bi-arrow-left"></i><span class="visually-hidden">Previous</span>
+            </button>
+            <div class="carousel-indicators hero__dots">
+              <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+              <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+              <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+              <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+              <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="4" aria-label="Slide 5"></button>
+            </div>
+            <button class="hero__ctrl" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+              <i class="bi bi-arrow-right"></i><span class="visually-hidden">Next</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Calls to action -->
+        <div class="tw-flex tw-flex-wrap tw-gap-3 tw-mt-8" data-reveal="fade-up" data-reveal-delay="200">
+          <a href="#contact" class="btn-zb btn-zb--solid btn-zb--lg">
+            Get a Quote <i class="bi bi-arrow-right-short"></i>
+          </a>
+          <a href="#product" class="btn-zb btn-zb--ghost btn-zb--lg">
+            Explore the Product
+          </a>
+        </div>
+
+        <!-- Quick trust row -->
+        <ul class="hero__trust" data-reveal="fade-up" data-reveal-delay="320">
+          <li><i class="bi bi-cloud-check"></i> Cloud-based software</li>
+          <li><i class="bi bi-shield-lock"></i> Heavy-gauge steel</li>
+          <li><i class="bi bi-headset"></i> 24/7 support</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll cue -->
+  <a href="#stats" class="hero__scroll" aria-label="Scroll to content">
+    <span class="hero__mouse"><span></span></span>
+  </a>
+</header>
+
+<!-- ============================================================
+     SECTION: STATS STRIP  (animated count-up — figures derived from
+     Zibomo's own published use-cases, partners and service claims)
+     ============================================================ -->
+<section id="stats" class="stats-strip">
+  <div class="container">
+    <div class="row g-4 tw-text-center">
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up">
+        <div class="stat">
+          <div class="stat__num"><span class="counter" data-count="5" data-pad="2">0</span></div>
+          <p class="stat__label">Core Use Cases</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="100">
+        <div class="stat">
+          <div class="stat__num"><span class="counter" data-count="4" data-pad="2">0</span></div>
+          <p class="stat__label">Collaborations</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="200">
+        <div class="stat">
+          <div class="stat__num">24<span class="stat__sep">/</span>7</div>
+          <p class="stat__label">Access &amp; Support</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="300">
+        <div class="stat">
+          <div class="stat__num"><span class="counter" data-count="100">0</span><span class="stat__sep">%</span></div>
+          <p class="stat__label">Touchless Transactions</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: USE CASES
+     ============================================================ -->
+<section id="useCases" class="section section--light">
+  <div class="container">
+
+    <div class="row tw-justify-center">
+      <div class="col-lg-8 tw-text-center">
+        <span class="sec-kicker" data-reveal="fade-down">Use Cases</span>
+        <h2 class="sec-title" data-reveal="fade-up">Zibomo Use Cases</h2>
+        <p class="sec-lead" data-reveal="fade-up" data-reveal-delay="120">
+          Zibomo Smart Lockers is the best solution to transform time-consuming manual tasks into
+          automated processes. Built with advanced digital technology beyond the simple keyless entry,
+          Zibomo Smart Lockers offer fully integrated reporting and real-time management.
+        </p>
+      </div>
+    </div>
+
+    <div class="row g-4 tw-mt-2 tw-justify-center">
+
+      <!-- Use case: Logistics -->
+      <div class="col-md-6 col-lg-4" data-reveal="fade-up">
+        <article class="uc-card">
+          <div class="uc-card__media">
+            <img src="assets/images/use-logistics.jpg" alt="Warehouse aisle stacked with palletised inventory"
+                 width="900" height="1200" loading="lazy" decoding="async">
+          </div>
+          <div class="uc-card__body">
+            <span class="uc-card__icon"><i class="bi bi-truck"></i></span>
+            <h3 class="uc-card__title">Logistics</h3>
+            <p>Zibomo Smart Lockers can automate the management of high-value devices, reducing loss,
+              damage, and management time. Personal storage lockers can likewise assist you in handling
+              allocated space for enormous and fast-moving workforces — on a shift-by-shift basis.</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- Use case: Residential -->
+      <div class="col-md-6 col-lg-4" data-reveal="fade-up" data-reveal-delay="100">
+        <article class="uc-card">
+          <div class="uc-card__media">
+            <img src="assets/images/use-residential.jpg" alt="Modern residential apartment block at dusk"
+                 width="900" height="1200" loading="lazy" decoding="async">
+          </div>
+          <div class="uc-card__body">
+            <span class="uc-card__icon"><i class="bi bi-house-door"></i></span>
+            <h3 class="uc-card__title">Residential</h3>
+            <p>Zibomo Smart Lockers offer residents a safe and secure, convenient, and trustworthy mail
+              retrieval option that puts experience first. They can even be configured to adjust large
+              items and deliveries, furnishing a suitable and practical solution for residents.</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- Use case: E-Commerce -->
+      <div class="col-md-6 col-lg-4" data-reveal="fade-up" data-reveal-delay="200">
+        <article class="uc-card">
+          <div class="uc-card__media">
+            <img src="assets/images/use-ecommerce.jpg" alt="Shopper checking out online with a payment card"
+                 width="900" height="600" loading="lazy" decoding="async">
+          </div>
+          <div class="uc-card__body">
+            <span class="uc-card__icon"><i class="bi bi-bag-check"></i></span>
+            <h3 class="uc-card__title">E-Commerce</h3>
+            <p>E-Commerce smart lockers permit customers to benefit from the ease of shopping online and
+              offer instantaneous, flexible collections. An order is allocated to a locker, and the customer
+              will be automatically informed when it's ready for pick up. Offering a user-friendly and unique
+              click-and-collect experience, Zibomo Smart Lockers can restore and refresh your shop floor.</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- Use case: Laundry -->
+      <div class="col-md-6 col-lg-4" data-reveal="fade-up" data-reveal-delay="100">
+        <article class="uc-card">
+          <div class="uc-card__media">
+            <img src="assets/images/use-laundry.jpg" alt="Row of commercial washing machines in a laundry room"
+                 width="900" height="600" loading="lazy" decoding="async">
+          </div>
+          <div class="uc-card__body">
+            <span class="uc-card__icon"><i class="bi bi-basket3"></i></span>
+            <h3 class="uc-card__title">Laundry</h3>
+            <p>People want convenience, and this business model offers the ultimate laundry service with
+              minimum effort. This can create an easy residual income for a hotel or property manager with
+              little to no effort. It likewise provides an efficient and time-saving service to your guests
+              or residents.</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- Use case: Schools / Universities -->
+      <div class="col-md-6 col-lg-4" data-reveal="fade-up" data-reveal-delay="200">
+        <article class="uc-card">
+          <div class="uc-card__media">
+            <img src="assets/images/use-schools.jpg" alt="School corridor lined with lockers"
+                 width="900" height="675" loading="lazy" decoding="async">
+          </div>
+          <div class="uc-card__body">
+            <span class="uc-card__icon"><i class="bi bi-mortarboard"></i></span>
+            <h3 class="uc-card__title">Schools / Universities</h3>
+            <p>Zibomo university lockers can create a safe and secure space for their belongings in class,
+              the gym, the library, or anywhere else on campus. With more students carrying precious cargo
+              like expensive phones and computers, sports equipment, and class projects or portfolios, having
+              an effortless, connected way for students and faculty to ensure their items are safe throughout
+              the day.</p>
+          </div>
+        </article>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: WHO WE ARE  (about + brand video in a Bootstrap modal)
+     ============================================================ -->
+<section id="whoAreWe" class="section section--navy">
+  <span class="orb orb--3" aria-hidden="true"></span>
+
+  <div class="container">
+    <div class="row g-5 tw-items-center">
+
+      <!-- Visual -->
+      <div class="col-lg-6" data-reveal="fade-right">
+        <div class="about-visual">
+          <img src="assets/images/digilocker1.png"
+               alt="A traveller using a Zibomo digital smart locker bank in an airport terminal"
+               width="1448" height="1086" loading="lazy" decoding="async" class="about-visual__img">
+
+          <!-- Play button opens the Zibomo product video -->
+          <button class="about-visual__play" data-bs-toggle="modal" data-bs-target="#videoModal"
+                  aria-label="Play the Zibomo product video">
+            <i class="bi bi-play-fill"></i>
+            <span class="about-visual__ring"></span>
+          </button>
+
+          <!-- Floating tagline card -->
+          <div class="about-visual__badge">
+            <i class="bi bi-quote"></i>
+            <p>Smart lockers for a smarter life.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copy -->
+      <div class="col-lg-6" data-reveal="fade-left" data-reveal-delay="120">
+        <span class="sec-kicker sec-kicker--on-dark">Who We Are</span>
+        <h2 class="sec-title sec-title--on-dark">Automating the everyday,<br class="tw-hidden lg:tw-block"> one locker at a time</h2>
+
+        <p class="sec-body sec-body--on-dark">
+          Zibomo is a business process automation (BPA) leader, leveraging a global footprint and
+          proprietary technology to provide digital transformation solutions enhancing quality,
+          productivity, and end-user experience.
+        </p>
+        <p class="sec-body sec-body--on-dark">
+          Zibomo Smart Lockers feature convenient, tech-enabled access, automated delivery notifications,
+          and audit-friendly tracking to provide seamless end-to-end solutions for organizations of all
+          sizes in all industries.
+        </p>
+
+        <p class="about-tagline">&ldquo;Smart lockers for a smarter life.&rdquo;</p>
+
+        <p class="sec-body sec-body--on-dark">
+          Residential, retailers, e-commerce platforms, logistics companies, workspaces, and many other
+          businesses use Zibomo Smart Lockers to improve operations and reduce operational costs.
+        </p>
+
+        <div class="tw-flex tw-flex-wrap tw-gap-3 tw-mt-7">
+          <a href="#Features" class="btn-zb btn-zb--solid">Features &amp; Benefits</a>
+          <button class="btn-zb btn-zb--outline-light" data-bs-toggle="modal" data-bs-target="#videoModal">
+            <i class="bi bi-play-circle"></i> Watch the video
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Video modal (Bootstrap) — pauses/resets via main.js -->
+<div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content video-modal">
+      <div class="modal-header tw-border-0">
+        <h5 class="modal-title tw-text-white tw-font-semibold" id="videoModalLabel">Zibomo Smart Lockers</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body tw-p-0">
+        <video id="brandVideo" class="tw-w-full" controls playsinline preload="none"
+               poster="assets/images/hero-lockers-1200.jpg">
+          <source src="assets/video/zibomo-demo.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION: FEATURES & BENEFITS
+     ============================================================ -->
+<section id="Features" class="section section--light">
+  <div class="container">
+
+    <div class="row tw-justify-center">
+      <div class="col-lg-8 tw-text-center">
+        <span class="sec-kicker" data-reveal="fade-down">Features &amp; Benefits</span>
+        <h2 class="sec-title" data-reveal="fade-up">Every innovative locker system incorporates</h2>
+        <p class="sec-lead" data-reveal="fade-up" data-reveal-delay="120">
+          Zibomo Smart Lockers to improve operations and reduce operational costs.
+        </p>
+      </div>
+    </div>
+
+    <!-- The four core features -->
+    <div class="row g-4 tw-mt-2">
+
+      <div class="col-md-6 col-lg-3" data-reveal="fade-up">
+        <article class="feat-card">
+          <span class="feat-card__icon"><i class="bi bi-cloud-arrow-up"></i></span>
+          <h3 class="feat-card__title">Cloud-Based Software</h3>
+          <p>Industry-leading robust cloud platform to allow safe and secure last-mile deliveries.</p>
+          <span class="feat-card__no">01</span>
+        </article>
+      </div>
+
+      <div class="col-md-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="100">
+        <article class="feat-card">
+          <span class="feat-card__icon"><i class="bi bi-shield-lock"></i></span>
+          <h3 class="feat-card__title">Reliable Hardware</h3>
+          <p>Keep packages secure and unauthorized users out with industry-grade heavy-gauge steel lockers.</p>
+          <span class="feat-card__no">02</span>
+        </article>
+      </div>
+
+      <div class="col-md-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="200">
+        <article class="feat-card">
+          <span class="feat-card__icon"><i class="bi bi-headset"></i></span>
+          <h3 class="feat-card__title">24/7 Support</h3>
+          <p>We're here to help. We can support your success with platform-driven business process solutions.</p>
+          <span class="feat-card__no">03</span>
+        </article>
+      </div>
+
+      <div class="col-md-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="300">
+        <article class="feat-card">
+          <span class="feat-card__icon"><i class="bi bi-arrow-repeat"></i></span>
+          <h3 class="feat-card__title">Automated Updates</h3>
+          <p>Get instant and automatic software updates to assure you continuously have the latest features.</p>
+          <span class="feat-card__no">04</span>
+        </article>
+      </div>
+
+    </div>
+
+    <!-- ---------- Key benefits ---------- -->
+    <div class="row tw-justify-center tw-mt-20">
+      <div class="col-lg-8 tw-text-center">
+        <h2 class="sec-title sec-title--sm" data-reveal="fade-up">Key benefits of Zibomo lockers</h2>
+        <p class="sec-lead" data-reveal="fade-up" data-reveal-delay="120">
+          Here are just some reasons why Zibomo is the platform of choice for top retailers,
+          enterprise-level organizations, property management companies, and more.
+        </p>
+      </div>
+    </div>
+
+    <div class="row g-4 tw-mt-2">
+      <div class="col-6 col-lg-3" data-reveal="zoom-in">
+        <div class="benefit"><span class="benefit__icon"><i class="bi bi-clock-history"></i></span>
+          <h3 class="benefit__title">Save Staff Time</h3></div>
+      </div>
+      <div class="col-6 col-lg-3" data-reveal="zoom-in" data-reveal-delay="100">
+        <div class="benefit"><span class="benefit__icon"><i class="bi bi-person-check"></i></span>
+          <h3 class="benefit__title">Empower Recipients</h3></div>
+      </div>
+      <div class="col-6 col-lg-3" data-reveal="zoom-in" data-reveal-delay="200">
+        <div class="benefit"><span class="benefit__icon"><i class="bi bi-shield-check"></i></span>
+          <h3 class="benefit__title">Enhance Security</h3></div>
+      </div>
+      <div class="col-6 col-lg-3" data-reveal="zoom-in" data-reveal-delay="300">
+        <div class="benefit"><span class="benefit__icon"><i class="bi bi-sliders"></i></span>
+          <h3 class="benefit__title">Customize Your Solution</h3></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: PRODUCT  (Bootstrap nav-tabs — Hardware / Software)
+     ============================================================ -->
+<section id="product" class="section section--tint">
+  <div class="container">
+
+    <div class="row tw-justify-center">
+      <div class="col-lg-8 tw-text-center">
+        <span class="sec-kicker" data-reveal="fade-down">Product</span>
+        <h2 class="sec-title" data-reveal="fade-up">Our Products</h2>
+      </div>
+    </div>
+
+    <!-- Tab switcher -->
+    <div class="tw-flex tw-justify-center tw-mt-8" data-reveal="fade-up">
+      <nav class="prod-tabs" id="nav-tab" role="tablist">
+        <button class="prod-tabs__btn active" id="nav-hardware-tab" data-bs-toggle="tab"
+                data-bs-target="#nav-hardware" type="button" role="tab"
+                aria-controls="nav-hardware" aria-selected="true">
+          <i class="bi bi-hdd-stack"></i> Hardware
+        </button>
+        <button class="prod-tabs__btn" id="nav-software-tab" data-bs-toggle="tab"
+                data-bs-target="#nav-software" type="button" role="tab"
+                aria-controls="nav-software" aria-selected="false">
+          <i class="bi bi-window-stack"></i> Software
+        </button>
+        <span class="prod-tabs__pill" aria-hidden="true"></span>
+      </nav>
+    </div>
+
+    <div class="tab-content tw-mt-10" id="nav-tabContent">
+
+      <!-- ---------- Tab: Hardware ---------- -->
+      <div class="tab-pane fade show active" id="nav-hardware" role="tabpanel" aria-labelledby="nav-hardware-tab" tabindex="0">
+        <div class="row g-5 tw-items-center">
+
+          <div class="col-lg-6">
+            <div class="prod-visual">
+              <img src="assets/images/digitallocker.png"
+                   alt="Zibomo digital smart locker installation with branded side panels"
+                   width="1448" height="1086" loading="lazy" decoding="async">
+              <span class="prod-visual__tag"><i class="bi bi-boxes"></i> Modular bays</span>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <h3 class="prod-title">Safe &amp; Secure Solution for Every Application</h3>
+            <p class="sec-body">
+              Backed by cutting-edge technology and innovative features, Zibomo smart lockers make it easy
+              to automate co-working spaces at corporate, residential, university, logistics, gym, and
+              correctional facilities. They support social distancing with completely touchless transactions,
+              assure a complete and secured chain of custody, and are built to safeguard deliveries for years to come.
+            </p>
+
+            <h4 class="prod-subtitle">Every innovative locker system includes:</h4>
+            <ul class="tick-list">
+              <li><i class="bi bi-check2-circle"></i> Reliable hardware</li>
+              <li><i class="bi bi-check2-circle"></i> Cloud-based software</li>
+              <li><i class="bi bi-check2-circle"></i> 24/7 support</li>
+              <li><i class="bi bi-check2-circle"></i> Automatic updates</li>
+              <li><i class="bi bi-check2-circle"></i> Detailed analytics report</li>
+            </ul>
+
+            <a href="#contact" class="btn-zb btn-zb--solid tw-mt-6">Request a spec sheet</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------- Tab: Software ---------- -->
+      <div class="tab-pane fade" id="nav-software" role="tabpanel" aria-labelledby="nav-software-tab" tabindex="0">
+        <div class="row g-5 tw-items-center">
+
+          <div class="col-lg-6 order-lg-2">
+            <div class="prod-visual">
+              <img src="assets/images/product-software.jpg" alt="Analytics dashboard showing locker usage metrics"
+                   width="1200" height="800" loading="lazy" decoding="async">
+              <span class="prod-visual__tag"><i class="bi bi-graph-up-arrow"></i> Live analytics</span>
+            </div>
+          </div>
+
+          <div class="col-lg-6 order-lg-1">
+            <h3 class="prod-title">Safe and secure solutions for all your asset management and delivery needs</h3>
+            <p class="sec-body">
+              Zibomo Smart Lockers comes with a no-nonsense robust automation solution that assists you in
+              improving operational efficiency.
+            </p>
+            <p class="sec-body">
+              The flexible and robust platform creates, organizes, and distributes facility operations and
+              maintenance tasks so you can focus more on your core responsibilities.
+            </p>
+
+            <h4 class="prod-subtitle">Making you stand out from the crowd:</h4>
+            <ul class="tick-list">
+              <li><i class="bi bi-check2-circle"></i> Future-proofed solutions for enterprise needs</li>
+              <li><i class="bi bi-check2-circle"></i> No Fancy Equipment Necessary</li>
+              <li><i class="bi bi-check2-circle"></i> Full Chain of Custody Tracking and Visibility</li>
+              <li><i class="bi bi-check2-circle"></i> Quick and Easy Package Logging</li>
+              <li><i class="bi bi-check2-circle"></i> Transparent and User-friendly</li>
+            </ul>
+
+            <a href="#contact" class="btn-zb btn-zb--solid tw-mt-6">Book a platform demo</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: HOW IT WORKS  (4-step journey)
+     ============================================================ -->
+<section id="howItWorks" class="section section--navy how">
+  <span class="orb orb--4" aria-hidden="true"></span>
+
+  <div class="container">
+    <div class="row tw-justify-center">
+      <div class="col-lg-8 tw-text-center">
+        <span class="sec-kicker sec-kicker--on-dark" data-reveal="fade-down">How It Works</span>
+        <h2 class="sec-title sec-title--on-dark" data-reveal="fade-up">Easy for both residentials and couriers</h2>
+      </div>
+    </div>
+
+    <div class="row g-4 tw-mt-6 how__row">
+      <!-- Connector line, drawn in style.css, animated on reveal -->
+      <span class="how__line" aria-hidden="true"></span>
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up">
+        <div class="step">
+          <span class="step__num">01</span>
+          <span class="step__icon"><i class="bi bi-cart-check"></i></span>
+          <h3 class="step__title">Residential places order online</h3>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="120">
+        <div class="step">
+          <span class="step__num">02</span>
+          <span class="step__icon"><i class="bi bi-truck"></i></span>
+          <h3 class="step__title">Courier delivers into locker</h3>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="240">
+        <div class="step">
+          <span class="step__num">03</span>
+          <span class="step__icon"><i class="bi bi-bell"></i></span>
+          <h3 class="step__title">Resident receives instant notifications</h3>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="360">
+        <div class="step">
+          <span class="step__num">04</span>
+          <span class="step__icon"><i class="bi bi-unlock"></i></span>
+          <h3 class="step__title">Resident retrieves anytime 24/7</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supporting imagery -->
+    <div class="row g-4 tw-mt-12 tw-items-center">
+      <div class="col-md-7" data-reveal="fade-right">
+        <div class="how__shot how__shot--wide">
+          <img src="assets/images/how-courier.jpg" alt="Courier handing a parcel to a recipient"
+               width="1200" height="1500" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="col-md-5" data-reveal="fade-left" data-reveal-delay="120">
+        <div class="how__shot">
+          <img src="assets/images/app-mobile.jpg" alt="Recipient checking a delivery notification on a phone"
+               width="1000" height="667" loading="lazy" decoding="async">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: COLLABORATION
+     ============================================================ -->
+<section id="collaboration" class="section section--light">
+  <div class="container">
+
+    <div class="row tw-justify-center">
+      <div class="col-lg-8 tw-text-center">
+        <span class="sec-kicker" data-reveal="fade-down">Collaboration</span>
+        <h2 class="sec-title" data-reveal="fade-up">Collaboration</h2>
+      </div>
+    </div>
+
+    <div class="row g-4 tw-mt-4 tw-justify-center">
+
+      <div class="col-6 col-lg-3" data-reveal="zoom-in">
+        <div class="partner">
+          <img src="assets/images/partners/South_Central.png" alt="South Central Railway"
+               width="536" height="476" loading="lazy" decoding="async">
+          <p class="partner__name">South Central Railways</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="zoom-in" data-reveal-delay="100">
+        <div class="partner">
+          <img src="assets/images/partners/apartments.png" alt="KPR Apartments"
+               width="482" height="470" loading="lazy" decoding="async">
+          <p class="partner__name">KPR Apartments</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="zoom-in" data-reveal-delay="200">
+        <div class="partner">
+          <img src="assets/images/partners/school.png" alt="Schools"
+               width="512" height="512" loading="lazy" decoding="async">
+          <p class="partner__name">Schools</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="zoom-in" data-reveal-delay="300">
+        <div class="partner">
+          <img src="assets/images/partners/laundry.png" alt="Resident Laundry Services"
+               width="519" height="486" loading="lazy" decoding="async">
+          <p class="partner__name">Resident Laundry Services</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: CLIENTS
+     ============================================================ -->
+<section id="clients" class="section section--tint">
+  <div class="container">
+
+    <div class="row tw-justify-center">
+      <div class="col-lg-8 tw-text-center">
+        <span class="sec-kicker" data-reveal="fade-down">Clients</span>
+        <h2 class="sec-title" data-reveal="fade-up">Our Clients</h2>
+        <p class="sec-lead" data-reveal="fade-up" data-reveal-delay="120">
+          Zibomo Smart Lockers in service across venues, campuses and public spaces.
+        </p>
+      </div>
+    </div>
+
+    <div class="row g-4 tw-mt-4 tw-justify-center">
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up">
+        <div class="client">
+          <span class="client__icon"><i class="bi bi-film"></i></span>
+          <h3 class="client__name">Prasads IMAX</h3>
+          <p class="client__type">Cinema &amp; Entertainment</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="100">
+        <div class="client">
+          <span class="client__icon"><i class="bi bi-shop"></i></span>
+          <h3 class="client__name">Odeon Mall</h3>
+          <p class="client__type">Retail &amp; Shopping</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="200">
+        <div class="client">
+          <span class="client__icon"><i class="bi bi-bank"></i></span>
+          <h3 class="client__name">Swarnagiri Temple</h3>
+          <p class="client__type">Temple &amp; Visitor Services</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="300">
+        <div class="client">
+          <span class="client__icon"><i class="bi bi-rocket-takeoff"></i></span>
+          <h3 class="client__name">T-Hub</h3>
+          <p class="client__type">Innovation Campus</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: CTA BAND
+     ============================================================ -->
+<section class="cta-band">
+  <div class="container">
+    <div class="cta-band__inner" data-reveal="zoom-in">
+      <div class="row tw-items-center g-4">
+        <div class="col-lg-8">
+          <h2 class="cta-band__title">Ready to put a Zibomo locker on site?</h2>
+          <p class="cta-band__text">Contact us for a quote, help, or to join the team.</p>
+        </div>
+        <div class="col-lg-4 lg:tw-text-right">
+          <a href="#contact" class="btn-zb btn-zb--light btn-zb--lg">Get a Quote <i class="bi bi-arrow-right-short"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: CONTACT
+     ============================================================ -->
+<section id="contact" class="section section--light">
+  <div class="container">
+
+    <div class="row tw-justify-center">
+      <div class="col-lg-8 tw-text-center">
+        <span class="sec-kicker" data-reveal="fade-down">Contact Us</span>
+        <h2 class="sec-title" data-reveal="fade-up">Get in Touch !</h2>
+        <p class="sec-lead" data-reveal="fade-up" data-reveal-delay="120">
+          Contact us for a quote, help, or to join the team.
+        </p>
+      </div>
+    </div>
+
+    <div class="row g-5 tw-mt-2">
+
+      <!-- Contact details -->
+      <div class="col-lg-5" data-reveal="fade-right">
+        <div class="contact-info">
+
+          <a class="info-row" href="tel:+919121208058">
+            <span class="info-row__icon"><i class="bi bi-telephone"></i></span>
+            <span><strong>Phone</strong>+91 9121208058</span>
+          </a>
+
+          <a class="info-row" href="mailto:support@zibomo.in">
+            <span class="info-row__icon"><i class="bi bi-envelope"></i></span>
+            <span><strong>Email</strong>support@zibomo.in</span>
+          </a>
+
+          <div class="info-row">
+            <span class="info-row__icon"><i class="bi bi-building"></i></span>
+            <span><strong>Manufacturing Address</strong>5-A/2, IDA, Nacharam, Hyderabad, Telangana 500076.</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-row__icon"><i class="bi bi-geo-alt"></i></span>
+            <span><strong>Development Center</strong>Lenskart lane, RTC colony, LB nagar, 5000</span>
+          </div>
+
+          <a class="info-row info-row--wa" href="https://wa.me/919121208058" target="_blank" rel="noopener">
+            <span class="info-row__icon"><i class="bi bi-whatsapp"></i></span>
+            <span><strong>WhatsApp</strong>Chat with the team</span>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- Contact form -->
+      <div class="col-lg-7" data-reveal="fade-left" data-reveal-delay="120">
+        <form id="contactForm" class="contact-form" novalidate>
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label for="name" class="form-label">Your Name</label>
+              <input type="text" class="form-control" id="name" name="name" placeholder="Jane Doe" required>
+              <div class="invalid-feedback">Please tell us your name.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="phone" class="form-label">Phone</label>
+              <input type="tel" class="form-control" id="phone" name="phone" placeholder="+91 90000 00000" required>
+              <div class="invalid-feedback">Please enter a valid phone number.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" name="email" placeholder="you@company.com" required>
+              <div class="invalid-feedback">Please enter a valid email address.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="subject" class="form-label">Subject</label>
+              <select class="form-select" id="subject" name="subject" required>
+                <option value="">Choose a topic…</option>
+                <option>Request a quote</option>
+                <option>Product &amp; hardware enquiry</option>
+                <option>Software / platform demo</option>
+                <option>Support</option>
+                <option>Join the team</option>
+              </select>
+              <div class="invalid-feedback">Please choose a subject.</div>
+            </div>
+
+            <div class="col-12">
+              <label for="message" class="form-label">Your Message</label>
+              <textarea class="form-control" id="message" name="message" rows="5"
+                        placeholder="Tell us about your site, locker count and timeline…" required></textarea>
+              <div class="invalid-feedback">Please add a short message.</div>
+            </div>
+
+            <div class="col-12">
+              <button type="submit" class="btn-zb btn-zb--solid btn-zb--lg tw-w-full sm:tw-w-auto">
+                Send Message <i class="bi bi-send"></i>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Status message, populated by js/main.js -->
+          <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION: FOOTER
+     ============================================================ -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="row g-5">
+
+      <!-- About -->
+      <div class="col-lg-4" data-reveal="fade-up">
+        <img src="assets/images/brand-foot-logo.png" alt="Zibomo — Sprint Safe"
+             width="160" height="60" class="tw-mb-5" loading="lazy">
+        <p class="site-footer__text">
+          Zibomo Smart Lockers feature convenient, tech-enabled access, automated delivery notifications,
+          and audit-friendly tracking to provide seamless end-to-end solutions for organizations of all
+          sizes in all industries.
+        </p>
+        <div class="social">
+          <a href="https://wa.me/919121208058" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+          <a href="mailto:support@zibomo.in" aria-label="Email"><i class="bi bi-envelope"></i></a>
+          <a href="tel:+919121208058" aria-label="Phone"><i class="bi bi-telephone"></i></a>
+        </div>
+      </div>
+
+      <!-- Quick links -->
+      <div class="col-6 col-lg-3" data-reveal="fade-up" data-reveal-delay="100">
+        <h3 class="site-footer__head">Quick Links</h3>
+        <ul class="foot-links">
+          <li><a href="#header">Home</a></li>
+          <li><a href="#whoAreWe">About Us</a></li>
+          <li><a href="#product">Product</a></li>
+          <li><a href="#Features">Features &amp; Benefits</a></li>
+          <li><a href="#useCases">Use Cases</a></li>
+          <li><a href="#collaboration">Collaboration</a></li>
+          <li><a href="#clients">Clients</a></li>
+          <li><a href="#contact">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <!-- Location -->
+      <div class="col-6 col-lg-5" data-reveal="fade-up" data-reveal-delay="200">
+        <h3 class="site-footer__head">Location</h3>
+        <ul class="foot-contact">
+          <li>
+            <i class="bi bi-building"></i>
+            <span><strong>Manufacturing Address:</strong><br>5-A/2, IDA, Nacharam, Hyderabad, Telangana 500076.</span>
+          </li>
+          <li>
+            <i class="bi bi-geo-alt"></i>
+            <span><strong>Development Center:</strong><br>Lenskart lane, RTC colony, LB nagar, 5000</span>
+          </li>
+          <li>
+            <i class="bi bi-telephone"></i>
+            <span><strong>Phone:</strong><br><a href="tel:+919121208058">+91 9121208058</a></span>
+          </li>
+          <li>
+            <i class="bi bi-envelope"></i>
+            <span><strong>Email:</strong><br><a href="mailto:support@zibomo.in">support@zibomo.in</a></span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Copyright bar -->
+  <div class="site-footer__bar">
+    <div class="container tw-flex tw-flex-col sm:tw-flex-row tw-items-center tw-justify-between tw-gap-2">
+      <p class="tw-mb-0">Copyright 2023 @ Zibomo Pvt. Ltd. All Rights Reserved</p>
+      <p class="tw-mb-0 tw-opacity-70">Smart lockers for a smarter life.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     FLOATING ACTIONS: WhatsApp + back to top
+     ============================================================ -->
+<a href="https://wa.me/919121208058" class="float-wa" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  <i class="bi bi-whatsapp"></i>
+</a>
+
+<button id="backToTop" class="float-top" aria-label="Back to top">
+  <i class="bi bi-arrow-up"></i>
+</button>
+
+<!-- ============================================================
+     SCRIPTS  (jQuery → Bootstrap bundle → site interactions)
+     ============================================================ -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
