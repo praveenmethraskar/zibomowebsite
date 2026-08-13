@@ -29,15 +29,16 @@
      13 .. Features & benefits
      14 .. Product
      15 .. How it works
-     16 .. Collaboration
-     17 .. Clients
-     18 .. CTA band
-     19 .. Contact
-     20 .. Footer
-     21 .. Floating actions
-     22 .. Decorative orbs
-     23 .. Responsive refinements
-     24 .. Reduced motion & print
+     16 .. Gallery
+     17 .. Collaboration
+     18 .. Clients
+     19 .. CTA band
+     20 .. Contact
+     21 .. Footer
+     22 .. Floating actions
+     23 .. Decorative orbs
+     24 .. Responsive refinements
+     25 .. Reduced motion & print
    ========================================================================== */
 
 
@@ -1165,7 +1166,80 @@ img { max-width: 100%; height: auto; }
 
 
 /* ==========================================================================
-   16. COLLABORATION
+   16. GALLERY
+   ========================================================================== */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-rows: 210px;
+  gap: 1.25rem;
+}
+
+.gallery-card {
+  position: relative;
+  grid-column: span 4;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--zb-radius);
+  background: var(--zb-navy);
+  box-shadow: var(--zb-shadow-sm);
+  isolation: isolate;
+}
+.gallery-card--feature {
+  grid-column: span 8;
+  grid-row: span 2;
+}
+
+.gallery-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .8s var(--zb-ease), filter .45s ease;
+}
+.gallery-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, transparent 42%, rgba(7, 15, 38, .88) 100%);
+  transition: background .45s ease;
+}
+.gallery-card:hover img {
+  transform: scale(1.07);
+  filter: saturate(1.08);
+}
+.gallery-card:hover::after {
+  background: linear-gradient(180deg, rgba(7, 15, 38, .05) 30%, rgba(7, 15, 38, .94) 100%);
+}
+
+.gallery-card figcaption {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  padding: 1.15rem 1.3rem;
+  color: #fff;
+}
+.gallery-card figcaption span {
+  display: block;
+  margin-bottom: .25rem;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #ff8e9d;
+}
+.gallery-card figcaption h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #fff;
+}
+.gallery-card--feature figcaption { padding: 1.7rem 1.8rem; }
+.gallery-card--feature figcaption h3 { font-size: clamp(1.35rem, 2vw, 1.85rem); }
+
+
+/* ========================================================================== 
+   17. COLLABORATION
    ========================================================================== */
 .partner {
   height: 100%;
@@ -1202,7 +1276,7 @@ img { max-width: 100%; height: auto; }
 
 
 /* ==========================================================================
-   17. CLIENTS
+   18. CLIENTS
    ========================================================================== */
 .client {
   position: relative;
@@ -1262,7 +1336,7 @@ img { max-width: 100%; height: auto; }
 
 
 /* ==========================================================================
-   18. CTA BAND
+   19. CTA BAND
    ========================================================================== */
 .cta-band { padding: 0 0 110px; background: var(--zb-surface); }
 .cta-band__inner {
@@ -1306,7 +1380,7 @@ img { max-width: 100%; height: auto; }
 
 
 /* ==========================================================================
-   19. CONTACT
+   20. CONTACT
    ========================================================================== */
 .contact-info { display: grid; gap: .9rem; }
 
@@ -1401,7 +1475,7 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
 
 
 /* ==========================================================================
-   20. FOOTER
+   21. FOOTER
    ========================================================================== */
 .site-footer {
   background: var(--zb-navy);
@@ -1485,7 +1559,7 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
 
 
 /* ==========================================================================
-   21. FLOATING ACTIONS
+   22. FLOATING ACTIONS
    ========================================================================== */
 .float-wa,
 .float-top {
@@ -1524,7 +1598,7 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
 
 
 /* ==========================================================================
-   22. DECORATIVE ORBS (soft brand-coloured light blooms)
+   23. DECORATIVE ORBS (soft brand-coloured light blooms)
    ========================================================================== */
 .orb {
   position: absolute;
@@ -1549,7 +1623,7 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
 
 
 /* ==========================================================================
-   23. RESPONSIVE REFINEMENTS
+   24. RESPONSIVE REFINEMENTS
    ========================================================================== */
 
 /* ---- Tablet ---- */
@@ -1568,6 +1642,10 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
 
   .how__shot img,
   .how__shot--wide img { aspect-ratio: 16 / 10; }
+
+  .gallery-grid { grid-auto-rows: 190px; }
+  .gallery-card { grid-column: span 6; }
+  .gallery-card--feature { grid-column: span 12; }
 }
 
 /* ---- Mobile ---- */
@@ -1588,6 +1666,8 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   .cta-band .col-lg-4 { text-align: center; }
 
   .partner img     { height: 68px; }
+  .gallery-grid    { grid-auto-rows: 190px; gap: .9rem; }
+  .gallery-card--feature { grid-row: span 2; }
   .step__icon      { width: 74px; height: 74px; font-size: 1.7rem; }
   .step__title     { font-size: .9rem; }
   .benefit         { padding: 1.5rem .8rem; }
@@ -1611,11 +1691,14 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   .hero__controls { gap: .7rem; }
   .sec-lead      { font-size: .95rem; }
   .about-visual__play { width: 62px; height: 62px; font-size: 1.7rem; }
+  .gallery-grid { grid-template-columns: 1fr; grid-auto-rows: 230px; }
+  .gallery-card,
+  .gallery-card--feature { grid-column: auto; grid-row: auto; }
 }
 
 
 /* ==========================================================================
-   24. REDUCED MOTION & PRINT
+   25. REDUCED MOTION & PRINT
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
