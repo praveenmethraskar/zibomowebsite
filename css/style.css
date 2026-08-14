@@ -1237,6 +1237,31 @@ img { max-width: 100%; height: auto; }
 .gallery-card--feature figcaption { padding: 1.7rem 1.8rem; }
 .gallery-card--feature figcaption h3 { font-size: clamp(1.35rem, 2vw, 1.85rem); }
 
+/* ---- Video tile ----
+   The clip is portrait (530x848), so the tile runs three rows tall and the
+   video is contained rather than cropped — the leftover space falls back to
+   the card's navy. Overlay and caption move to the top and stop taking pointer
+   events, otherwise they cover and swallow clicks on the native control bar. */
+.gallery-card--video {
+  grid-column: span 4;
+  grid-row: span 3;
+}
+.gallery-card--video video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--zb-navy);
+}
+.gallery-card--video::after,
+.gallery-card--video figcaption { pointer-events: none; }
+
+.gallery-card--video::after,
+.gallery-card--video:hover::after {
+  background: linear-gradient(180deg, rgba(7, 15, 38, .8) 0%, transparent 32%);
+}
+.gallery-card--video figcaption { inset: 0 0 auto; padding: .95rem 1.1rem; }
+
 
 /* ========================================================================== 
    17. COLLABORATION
@@ -1646,6 +1671,7 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   .gallery-grid { grid-auto-rows: 190px; }
   .gallery-card { grid-column: span 6; }
   .gallery-card--feature { grid-column: span 12; }
+  .gallery-card--video   { grid-column: span 6; grid-row: span 3; }
 }
 
 /* ---- Mobile ---- */
@@ -1694,6 +1720,7 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   .gallery-grid { grid-template-columns: 1fr; grid-auto-rows: 230px; }
   .gallery-card,
   .gallery-card--feature { grid-column: auto; grid-row: auto; }
+  .gallery-card--video   { grid-column: auto; grid-row: span 3; }
 }
 
 
