@@ -1,0 +1,12 @@
+# Real mail credentials — uploaded once to the server, never committed.
+includes/config.php
+
+# The brochure and its log live outside version control so the PDF can
+# never be published by the GitHub Pages workflow (which uploads the
+# whole repository).
+private/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log

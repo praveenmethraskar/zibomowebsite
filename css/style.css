@@ -1953,3 +1953,246 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   .partner      { font-size: .84rem; padding: .6rem .95rem; }
   .hero__lede   { font-size: .93rem; }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Brochure request page (brochure.php)
+   Standalone page; reuses the brand tokens, buttons and form
+   controls defined above.
+   ───────────────────────────────────────────────────────────── */
+.brochure-page {
+  background: var(--zb-tint);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Slim top bar ---- */
+.brochure-bar {
+  background: var(--zb-navy);
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.brochure-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+/* The wordmark artwork is dark-on-transparent, so it has to be inverted
+   to read on the navy bar — same treatment as .site-nav__logo. */
+.brochure-bar__brand img {
+  height: 38px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+.brochure-bar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: .2rem;
+  color: rgba(255, 255, 255, .75);
+  font-size: .9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--zb-fast);
+}
+.brochure-bar__back:hover { color: #fff; }
+.brochure-bar__back i { font-size: 1.3em; }
+
+/* ---- Layout ---- */
+.brochure-main { flex: 1; padding: clamp(2.2rem, 1.4rem + 3vw, 4.5rem) 0; }
+
+/* ---- Left column ---- */
+.brochure-intro__title {
+  font-size: clamp(1.9rem, 1.4rem + 2vw, 2.7rem);
+  line-height: 1.12;
+  margin: .5rem 0 .9rem;
+  letter-spacing: -.02em;
+}
+.brochure-intro__lead {
+  color: var(--zb-body);
+  font-size: 1.02rem;
+  line-height: 1.75;
+  max-width: 44ch;
+  margin-bottom: 2rem;
+}
+.brochure-points { list-style: none; padding: 0; margin: 0 0 2rem; }
+.brochure-points li {
+  display: flex;
+  gap: .9rem;
+  align-items: flex-start;
+  margin-bottom: 1.1rem;
+}
+.brochure-points i {
+  flex: none;
+  width: 38px; height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: var(--zb-red-soft);
+  color: var(--zb-red);
+  font-size: 1.05rem;
+}
+.brochure-points span { font-size: .91rem; color: var(--zb-body); line-height: 1.6; }
+.brochure-points strong { display: block; color: var(--zb-ink); font-size: .97rem; margin-bottom: .1rem; }
+
+.brochure-contact {
+  border-top: 1px solid var(--zb-line);
+  padding-top: 1.3rem;
+}
+.brochure-contact p {
+  font-size: .82rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--zb-muted, #7C8699);
+  margin: 0 0 .6rem;
+}
+.brochure-contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-right: 1.4rem;
+  color: var(--zb-ink);
+  font-weight: 500;
+  font-size: .93rem;
+  text-decoration: none;
+}
+.brochure-contact a:hover { color: var(--zb-red); }
+.brochure-contact i { color: var(--zb-red); }
+
+/* ---- Form card ---- */
+.brochure-card {
+  background: var(--zb-surface);
+  border: 1px solid var(--zb-line);
+  border-radius: var(--zb-radius);
+  box-shadow: var(--zb-shadow);
+  padding: clamp(1.5rem, 1.1rem + 1.6vw, 2.6rem);
+}
+.brochure-card__title { font-size: 1.35rem; margin: 0 0 .25rem; }
+.brochure-card__hint { font-size: .84rem; color: var(--zb-body); margin: 0 0 1.5rem; }
+
+.req { color: var(--zb-red); font-weight: 700; }
+.opt { color: #7C8699; font-weight: 400; font-size: .85em; }
+
+.brochure-form .form-label {
+  font-size: .87rem;
+  font-weight: 600;
+  color: var(--zb-ink);
+  margin-bottom: .4rem;
+}
+.brochure-form .form-control,
+.brochure-form .form-select {
+  border: 1px solid var(--zb-line);
+  border-radius: 12px;
+  padding: .82rem 1rem;
+  font-size: .95rem;
+  color: var(--zb-ink);
+  background-color: #fff;
+  transition: border-color var(--zb-fast), box-shadow var(--zb-fast);
+}
+.brochure-form .form-control:focus,
+.brochure-form .form-select:focus {
+  border-color: var(--zb-red);
+  box-shadow: 0 0 0 4px var(--zb-red-soft);
+  outline: none;
+}
+.brochure-form .form-control.is-invalid,
+.brochure-form .form-select.is-invalid {
+  border-color: var(--zb-red);
+  background-image: none;
+}
+.brochure-form .invalid-feedback { font-size: .82rem; color: var(--zb-red); margin-top: .35rem; }
+.brochure-form textarea.form-control { resize: vertical; min-height: 110px; }
+
+/* ---- Alert ---- */
+.brochure-alert {
+  display: flex;
+  gap: .7rem;
+  align-items: flex-start;
+  border-radius: 12px;
+  padding: .95rem 1.1rem;
+  font-size: .9rem;
+  line-height: 1.6;
+  margin-bottom: 1.4rem;
+}
+.brochure-alert i { font-size: 1.05rem; flex: none; margin-top: .1rem; }
+.brochure-alert--error {
+  background: var(--zb-red-soft);
+  border: 1px solid rgba(232, 17, 45, .3);
+  color: #9B1024;
+}
+
+/* ---- Honeypot: off-screen, not display:none, so bots still fill it ---- */
+.brochure-hp {
+  position: absolute !important;
+  left: -9999px !important;
+  top: auto;
+  width: 1px; height: 1px;
+  overflow: hidden;
+}
+
+/* ---- Submit ---- */
+.brochure-submit { width: 100%; justify-content: center; }
+.brochure-submit[disabled] { opacity: .75; cursor: progress; transform: none; }
+.brochure-submit__spinner { display: none; }
+.brochure-submit.is-loading .brochure-submit__spinner {
+  display: inline-block;
+  width: 1em; height: 1em;
+  margin-left: .6rem;
+  border: 2px solid rgba(255, 255, 255, .45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: zb-spin .7s linear infinite;
+}
+@keyframes zb-spin { to { transform: rotate(360deg); } }
+
+.brochure-privacy {
+  font-size: .8rem;
+  color: #7C8699;
+  line-height: 1.6;
+  margin: .9rem 0 0;
+  text-align: center;
+}
+
+/* ---- Success ---- */
+.brochure-success { text-align: center; padding: 1rem 0; }
+.brochure-success__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: rgba(15, 124, 99, .12);
+  color: #0F7C63;
+  font-size: 2rem;
+  margin-bottom: 1.2rem;
+}
+.brochure-success h2 { font-size: 1.4rem; margin: 0 0 .6rem; }
+.brochure-success p { color: var(--zb-body); font-size: .96rem; line-height: 1.7; margin: 0 auto 1.6rem; max-width: 42ch; }
+.brochure-success__btn { width: 100%; justify-content: center; }
+.brochure-success__note {
+  font-size: .82rem !important;
+  color: #7C8699 !important;
+  margin: 1.2rem auto 0 !important;
+}
+.brochure-success__note a { color: var(--zb-red); }
+
+/* ---- Footer ---- */
+.brochure-foot {
+  background: var(--zb-navy);
+  padding: 1.3rem 0;
+  text-align: center;
+}
+.brochure-foot p {
+  margin: 0;
+  font-size: .82rem;
+  color: rgba(255, 255, 255, .6);
+}
+
+@media (max-width: 991.98px) {
+  .brochure-intro { margin-bottom: .5rem; }
+  .brochure-intro__lead { max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brochure-submit.is-loading .brochure-submit__spinner { animation: none; }
+}
