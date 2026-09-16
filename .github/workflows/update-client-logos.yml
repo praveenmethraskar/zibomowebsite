@@ -1,0 +1,121 @@
+name: Update client logos
+
+on:
+  push:
+    paths:
+      - '.github/workflows/update-client-logos.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-client-logos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download and prepare client logos
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/images/clients
+          python3 - <<'PY'
+          import base64, pathlib, urllib.request
+
+          out = pathlib.Path('assets/images/clients')
+          out.mkdir(parents=True, exist_ok=True)
+
+          def download(name, urls):
+              last = None
+              for url in urls:
+                  try:
+                      req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                      with urllib.request.urlopen(req, timeout=30) as r:
+                          data = r.read()
+                      if len(data) < 1000:
+                          raise ValueError('download too small')
+                      (out / name).write_bytes(data)
+                      print(f'{name}: {len(data)} bytes from {url}')
+                      return
+                  except Exception as e:
+                      last = e
+                      print(f'Failed {url}: {e}')
+              raise RuntimeError(f'Could not download {name}: {last}')
+
+          download('prasads.png', [
+              'https://www.joonsquare.com/usermanage/image/business/prasads-multiplex-hyderabad-34123/prasads-multiplex-hyderabad-logo.png',
+              'https://pbs.twimg.com/profile_images/1618498239136960513/4cz-Lbb9_400x400.jpg'
+          ])
+          download('odeon-mall.png', [
+              'https://odeonmall.com/wp-content/uploads/2025/04/odeon-mall-Logo-White.png'
+          ])
+          download('swarnagiri.png', [
+              'https://ytdtemple.com/uploads/pooja/84e553725fbb19675c7d4e4bc42f90f3.png',
+              'https://ytdtemple.com/front_assets/images/swarngiri_logo.png'
+          ])
+          download('t-hub.png', [
+              'https://t-hub.co/wp-content/uploads/2019/07/thub-logo-3.png',
+              'https://t-hub.co/static/relaunch/assets/img/t_hub_logo.png'
+          ])
+
+          upzy_b64 = '''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'''
+          (out / 'upzy.jpg').write_bytes(base64.b64decode(upzy_b64))
+          PY
+
+          cp assets/images/partners/South_Central.png assets/images/clients/south-central-railway.png
+
+      - name: Patch only the clients section
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('index.html')
+          html = path.read_text(encoding='utf-8')
+
+          replacement = '''<section id="clients" class="section section--light"><div class="container"><div class="row tw-justify-center"><div class="col-lg-8 tw-text-center"><span class="sec-kicker" data-reveal="fade-down">Clients</span><h2 class="sec-title" data-reveal="fade-up">Smart Lockers in Action</h2><p class="sec-lead" data-reveal="fade-up" data-reveal-delay="120">Zibomo solutions are deployed across retail, entertainment, religious, technology and public infrastructure environments.</p></div></div><div class="row g-4 tw-mt-4 tw-justify-center">
+  <div class="col-6 col-lg-4" data-reveal="fade-up"><div class="client"><img src="assets/images/clients/prasads.png" alt="Prasads Multiplex logo" loading="lazy" style="max-width:160px;max-height:82px;width:auto;height:auto;object-fit:contain;margin-bottom:1rem;"><h3 class="client__name">Prasads Multiplex</h3><p class="client__type">Cinema &amp; Entertainment</p></div></div>
+  <div class="col-6 col-lg-4" data-reveal="fade-up" data-reveal-delay="80"><div class="client"><img src="assets/images/clients/odeon-mall.png" alt="Odeon Mall logo" loading="lazy" style="max-width:160px;max-height:82px;width:auto;height:auto;object-fit:contain;margin-bottom:1rem;background:#0A1638;padding:8px 12px;border-radius:8px;"><h3 class="client__name">Odeon Mall</h3><p class="client__type">Retail &amp; Shopping</p></div></div>
+  <div class="col-6 col-lg-4" data-reveal="fade-up" data-reveal-delay="160"><div class="client"><img src="assets/images/clients/swarnagiri.png" alt="Swarnagiri Sree Venkateswara Swamy Devasthanam logo" loading="lazy" style="max-width:160px;max-height:82px;width:auto;height:auto;object-fit:contain;margin-bottom:1rem;"><h3 class="client__name">Swarnagiri</h3><p class="client__type">Temple &amp; Visitor Services</p></div></div>
+  <div class="col-6 col-lg-4" data-reveal="fade-up"><div class="client"><img src="assets/images/clients/t-hub.png" alt="T-Hub logo" loading="lazy" style="max-width:160px;max-height:82px;width:auto;height:auto;object-fit:contain;margin-bottom:1rem;"><h3 class="client__name">T-Hub</h3><p class="client__type">Innovation &amp; Technology Campus</p></div></div>
+  <div class="col-6 col-lg-4" data-reveal="fade-up" data-reveal-delay="80"><div class="client"><img src="assets/images/clients/south-central-railway.png" alt="South Central Railway logo" loading="lazy" style="max-width:160px;max-height:82px;width:auto;height:auto;object-fit:contain;margin-bottom:1rem;"><h3 class="client__name">South Central Railway</h3><p class="client__type">Public Transport Infrastructure</p></div></div>
+  <div class="col-6 col-lg-4" data-reveal="fade-up" data-reveal-delay="160"><div class="client"><img src="assets/images/clients/upzy.jpg" alt="Upzy logo" loading="lazy" style="max-width:180px;max-height:82px;width:auto;height:auto;object-fit:contain;margin-bottom:1rem;border-radius:8px;"><h3 class="client__name">Upzy</h3><p class="client__type">Gig Worker Platform</p></div></div>
+</div></div></section>'''
+
+          pattern = r'<section id="clients" class="section section--light">.*?</section>'
+          updated, count = re.subn(pattern, replacement, html, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit(f'Expected exactly one clients section, found {count}')
+          path.write_text(updated, encoding='utf-8')
+          PY
+
+      - name: Verify targeted change
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'assets/images/clients/prasads.png' index.html
+          grep -q 'assets/images/clients/upzy.jpg' index.html
+          grep -q 'id="faq"' index.html
+          grep -q 'id="product"' index.html
+          test -s assets/images/clients/prasads.png
+          test -s assets/images/clients/odeon-mall.png
+          test -s assets/images/clients/swarnagiri.png
+          test -s assets/images/clients/t-hub.png
+          test -s assets/images/clients/south-central-railway.png
+          test -s assets/images/clients/upzy.jpg
+
+      - name: Commit logo assets and client section
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/images/clients/
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Add client logos without changing site structure'
+          git push
