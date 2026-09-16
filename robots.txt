@@ -1,0 +1,8 @@
+# https://www.zibomo.ooo/robots.txt
+User-agent: *
+Allow: /
+
+# Block nothing — this is a single-page marketing site.
+# Add Disallow rules here only for admin or staging paths.
+
+Sitemap: https://www.zibomo.ooo/sitemap.xml

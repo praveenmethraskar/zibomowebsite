@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://www.zibomo.ooo/</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://www.zibomo.ooo/assets/images/hero-banner1-1920.jpg</image:loc>
+      <image:title>Zibomo digital smart lockers</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.zibomo.ooo/assets/images/digitallocker.png</image:loc>
+      <image:title>Zibomo modular digital smart locker hardware</image:title>
+    </image:image>
+  </url>
+</urlset>
