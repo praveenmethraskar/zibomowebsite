@@ -22,6 +22,7 @@
      13 .. Back to top
      14 .. Magnetic buttons
      15 .. Contact form validation
+     16 .. Locations map
    ========================================================================== */
 
 (function ($) {
@@ -568,6 +569,193 @@
 
           $form.find('.form-control, .form-select').removeClass('is-invalid field-shake');
         });
+      }());
+
+
+      /* ==================================================================
+         16. LOCATIONS MAP
+         Leaflet + OpenStreetMap tiles, so there is no API key or billing
+         account behind it. The hidden .loc-data list in #locations is the
+         data source (one <li> per site with data-lat / data-lng, data-type,
+         data-address and a Google Maps link), so adding a site never
+         touches this file. Each pin's popup carries the address plus
+         Directions and Google Maps buttons. The map is only built when the
+         section nears the viewport, and pins that would overlap at low zoom
+         merge into a numbered cluster.
+         ================================================================== */
+      (function initLocationsMap() {
+        var $section = $('.locations');
+        var mapEl    = document.getElementById('locationsMap');
+        if (!$section.length || !mapEl) { return; }
+
+        // No map: say so and reveal the plain list of Google Maps links.
+        function fail(err) {
+          $section.addClass('is-map-failed');
+          $section.find('.locations-map__status')
+            .text('The map could not load. Open a location in Google Maps below.');
+          $section.find('.loc-data').removeAttr('hidden');
+          if (err && window.console && console.error) {
+            console.error('[Zibomo] locations map failed.', err);
+          }
+        }
+
+        // Leaflet blocked or offline: bail out here rather than throw, which
+        // would take every other module down with it.
+        if (typeof L === 'undefined' || typeof L.markerClusterGroup !== 'function') {
+          fail();
+          return;
+        }
+
+        // On touch screens one finger keeps scrolling the page; two fingers
+        // move the map, since Leaflet's pinch handler pans as well as zooms.
+        var coarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+
+        var pin = L.divIcon({
+          className: 'loc-pin',
+          html: '<svg viewBox="0 0 32 42" aria-hidden="true">' +
+                '<path d="M16 1C7.7 1 1 7.6 1 15.8 1 26.9 16 41 16 41s15-14.1 15-25.2C31 7.6 24.3 1 16 1z"/>' +
+                '<circle cx="16" cy="15.5" r="5.5"/></svg>',
+          iconSize: [32, 42],
+          iconAnchor: [16, 41],
+          popupAnchor: [0, -38]
+        });
+
+        function node(tag, className, text) {
+          var el = document.createElement(tag);
+          el.className = className;
+          if (text) { el.textContent = text; }
+          return el;
+        }
+
+        function outLink(className, href, icon, label) {
+          var a = node('a', className);
+          a.href   = href;
+          a.target = '_blank';
+          a.rel    = 'noopener';
+          a.innerHTML = '<i class="bi ' + icon + '"></i> ';
+          a.appendChild(document.createTextNode(label));
+          return a;
+        }
+
+        function popupFor(site) {
+          var box     = node('div', 'loc-popup');
+          var actions = node('div', 'loc-popup__actions');
+
+          box.appendChild(node('strong', 'loc-popup__name', site.name));
+          if (site.type)    { box.appendChild(node('span', 'loc-popup__type', site.type)); }
+          if (site.address) { box.appendChild(node('span', 'loc-popup__addr', site.address)); }
+
+          actions.appendChild(outLink('loc-popup__btn loc-popup__btn--solid',
+            'https://www.google.com/maps/dir/?api=1&destination=' + site.lat + ',' + site.lng,
+            'bi-sign-turn-right', 'Directions'));
+          if (site.gmaps) {
+            actions.appendChild(outLink('loc-popup__btn loc-popup__btn--line', site.gmaps,
+              'bi-box-arrow-up-right', 'Google Maps'));
+          }
+
+          box.appendChild(actions);
+          return box;
+        }
+
+        function build() {
+          var map = L.map(mapEl, {
+            scrollWheelZoom: false,     // enabled once the visitor clicks into the map
+            dragging: !coarse
+          });
+
+          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }).addTo(map);
+
+          var cluster = L.markerClusterGroup({
+            maxClusterRadius: 40,
+            showCoverageOnHover: false,
+            iconCreateFunction: function (group) {
+              return L.divIcon({
+                className: 'loc-cluster',
+                html: '<span>' + group.getChildCount() + '</span>',
+                iconSize: [42, 42]
+              });
+            }
+          });
+
+          // On phone-width maps a full-size popup runs under the zoom buttons
+          // and off the right edge; 120px covers the buttons' 56px lane, the
+          // popup's own margins and a gutter.
+          var popupWidth = Math.max(160, Math.min(280, mapEl.clientWidth - 120));
+          var popupOpts  = {
+            minWidth: Math.min(220, popupWidth),
+            maxWidth: popupWidth,
+            autoPanPaddingTopLeft: L.point(56, 16),
+            autoPanPaddingBottomRight: L.point(16, 16)
+          };
+
+          var bounds = L.latLngBounds([]);
+
+          $section.find('.loc-data li').each(function () {
+            var $li  = $(this);
+            var $a   = $li.find('a').first();
+            var site = {
+              lat:     parseFloat($li.attr('data-lat')),
+              lng:     parseFloat($li.attr('data-lng')),
+              name:    $.trim($a.text() || $li.text()),
+              type:    $.trim($li.attr('data-type') || ''),
+              address: $.trim($li.attr('data-address') || ''),
+              gmaps:   $a.attr('href')
+            };
+            if (isNaN(site.lat) || isNaN(site.lng)) { return; }
+
+            var marker = L.marker([site.lat, site.lng], {
+              icon: pin,
+              title: site.name,
+              riseOnHover: true
+            })
+              .bindPopup(popupFor(site), popupOpts)
+              // Navy pin while its popup is open.
+              .on('popupopen', function () { $(marker.getElement()).addClass('is-active'); })
+              .on('popupclose', function () { $(marker.getElement()).removeClass('is-active'); });
+
+            cluster.addLayer(marker);
+            bounds.extend([site.lat, site.lng]);
+          });
+
+          if (!bounds.isValid()) { throw new Error('no usable data-lat / data-lng in .loc-data'); }
+
+          map.addLayer(cluster);
+          map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+
+          map.on('click focus', function () { map.scrollWheelZoom.enable(); });
+          map.on('mouseout blur', function () { map.scrollWheelZoom.disable(); });
+
+          $section.addClass('is-map-ready');
+        }
+
+        var started = false;
+        function start() {
+          if (started) { return; }
+          started = true;
+          try {
+            build();
+          } catch (err) {
+            fail(err);
+          }
+        }
+
+        if ('IntersectionObserver' in window) {
+          var watcher = new IntersectionObserver(function (items) {
+            for (var i = 0; i < items.length; i++) {
+              if (items[i].isIntersecting) {
+                watcher.disconnect();
+                start();
+                return;
+              }
+            }
+          }, { rootMargin: '400px 0px' });
+          watcher.observe(mapEl);
+        } else {
+          start();
+        }
       }());
 
 
