@@ -31,11 +31,6 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html assets/images/clients/
-          if ! git diff --cached --quiet; then
-            git commit -m 'Add client logos without changing site structure'
-            git push
-          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
