@@ -46,7 +46,11 @@ if (!zb_same_origin()) {
     zb_contact_reply(403, array('ok' => false, 'message' => $GENERIC_ERROR));
 }
 
+<<<<<<< HEAD
 if (!empty($_POST['website'])) {
+=======
+if (!empty($_POST['zb_hp'])) {
+>>>>>>> 8b742b9 (completed)
     // Honeypot. A real visitor never sees this field.
     zb_log('Contact form: honeypot triggered — submission discarded.');
     zb_contact_reply(400, array('ok' => false, 'message' => $GENERIC_ERROR));
@@ -72,20 +76,29 @@ $values = array(
 );
 
 // Same rules as the checks in js/main.js, which only exist to save a round trip.
+<<<<<<< HEAD
+=======
+// Only name and phone are required; what is given in the other fields must
+// still be valid.
+>>>>>>> 8b742b9 (completed)
 $errors = array();
 
 if (mb_strlen($values['name']) < 2) {
     $errors['name'] = 'Please tell us your name.';
 }
 
+<<<<<<< HEAD
 if ($values['company'] === '') {
     $errors['company'] = 'Please tell us your business or organization.';
 }
 
+=======
+>>>>>>> 8b742b9 (completed)
 if (!zb_valid_phone($values['phone'])) {
     $errors['phone'] = 'Please enter a valid phone number.';
 }
 
+<<<<<<< HEAD
 if (!filter_var($values['email'], FILTER_VALIDATE_EMAIL)) {
     $errors['email'] = 'Please enter a valid email address.';
 }
@@ -96,6 +109,15 @@ if (!in_array($values['subject'], zb_requirements(), true)) {
 
 if (mb_strlen($values['message']) < 10) {
     $errors['message'] = 'Please add a short message.';
+=======
+if ($values['email'] !== '' && !filter_var($values['email'], FILTER_VALIDATE_EMAIL)) {
+    $errors['email'] = 'Please enter a valid email address.';
+}
+
+if ($values['subject'] !== '' && !in_array($values['subject'], zb_requirements(), true)) {
+    // Someone edited the select. Do not pass an arbitrary value on.
+    $errors['subject'] = 'Please choose a requirement from the list.';
+>>>>>>> 8b742b9 (completed)
 }
 
 if ($errors) {

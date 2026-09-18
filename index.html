@@ -460,7 +460,7 @@
         </div>
         <div class="col-md-6 col-lg-4" data-reveal="fade-up" data-reveal-delay="160">
           <article class="uc-card">
-            <div class="uc-card__media"><img src="assets/hospital.png"
+            <div class="uc-card__media"><img src="assets/conve.jpeg"
                 alt="Digital lockers for convention centres and event venues" width="900" height="675" loading="lazy">
             </div>
             <div class="uc-card__body"><span class="uc-card__icon"><i class="bi bi-gem"></i></span>
@@ -1215,29 +1215,39 @@
         </div>
         <div class="col-lg-7" data-reveal="fade-left" data-reveal-delay="120">
           <form id="contactForm" class="contact-form" method="post" action="contact.php" novalidate>
+<<<<<<< HEAD
             <!-- Honeypot: hidden from people, filled in by bots. -->
             <div class="form-hp" aria-hidden="true"><label for="contactWebsite">Website</label><input type="text"
                 id="contactWebsite" name="website" tabindex="-1" autocomplete="off"></div>
+=======
+            <!-- Honeypot: bots fill every field they find in the HTML. `hidden` keeps
+                 it away from people and from browser autofill, which filled the
+                 old off-screen "website" field for real visitors. -->
+            <div class="form-hp" aria-hidden="true" hidden><label for="contactHp">Leave this empty</label><input
+                type="text" id="contactHp" name="zb_hp" tabindex="-1" autocomplete="off"></div>
+>>>>>>> 8b742b9 (completed)
             <div class="row g-3">
-              <div class="col-md-6"><label for="name" class="form-label">Your Name</label><input type="text"
-                  class="form-control" id="name" name="name" placeholder="Your name" required>
+              <div class="col-md-6"><label for="name" class="form-label">Your Name <span class="req">*</span></label><input
+                  type="text" class="form-control" id="name" name="name" placeholder="Your name" autocomplete="name"
+                  required>
                 <div class="invalid-feedback">Please tell us your name.</div>
               </div>
-              <div class="col-md-6"><label for="company" class="form-label">Business / Organization</label><input
-                  type="text" class="form-control" id="company" name="company" placeholder="Company or community name"
-                  required>
-                <div class="invalid-feedback">Please tell us your business or organization.</div>
+              <div class="col-md-6"><label for="company" class="form-label">Business / Organization <span
+                    class="opt">(optional)</span></label><input type="text" class="form-control" id="company"
+                  name="company" placeholder="Company or community name" autocomplete="organization">
               </div>
-              <div class="col-md-6"><label for="phone" class="form-label">Phone Number</label><input type="tel"
-                  class="form-control" id="phone" name="phone" placeholder="+91 90000 00000" required>
+              <div class="col-md-6"><label for="phone" class="form-label">Phone Number <span class="req">*</span></label><input
+                  type="tel" class="form-control" id="phone" name="phone" placeholder="+91 90000 00000" autocomplete="tel"
+                  required>
                 <div class="invalid-feedback">Please enter a valid phone number.</div>
               </div>
-              <div class="col-md-6"><label for="email" class="form-label">Email</label><input type="email"
-                  class="form-control" id="email" name="email" placeholder="you@company.com" required>
+              <div class="col-md-6"><label for="email" class="form-label">Email <span class="opt">(optional)</span></label><input
+                  type="email" class="form-control" id="email" name="email" placeholder="you@company.com"
+                  autocomplete="email">
                 <div class="invalid-feedback">Please enter a valid email address.</div>
               </div>
-              <div class="col-md-6"><label for="subject" class="form-label">Requirement</label><select
-                  class="form-select" id="subject" name="subject" required>
+              <div class="col-md-6"><label for="subject" class="form-label">Requirement <span
+                    class="opt">(optional)</span></label><select class="form-select" id="subject" name="subject">
                   <option value="">Choose a requirement…</option>
                   <option>Business / Corporate lockers</option>
                   <option>Gated community lockers</option>
@@ -1247,13 +1257,11 @@
                   <option>Laundry / Parcel lockers</option>
                   <option>Product &amp; software demo</option>
                 </select>
-                <div class="invalid-feedback">Please choose a requirement.</div>
+                <div class="invalid-feedback">Please choose a requirement from the list.</div>
               </div>
-              <div class="col-12"><label for="message" class="form-label">Your Message</label><textarea
-                  class="form-control" id="message" name="message" rows="5"
-                  placeholder="Tell us your location, available space, expected users and storage requirement…"
-                  required></textarea>
-                <div class="invalid-feedback">Please add a short message.</div>
+              <div class="col-12"><label for="message" class="form-label">Your Message <span
+                    class="opt">(optional)</span></label><textarea class="form-control" id="message" name="message"
+                  rows="5" placeholder="Tell us your location, available space, expected users and storage requirement…"></textarea>
               </div>
               <div class="col-12"><button type="submit"
                   class="btn-zb btn-zb--solid btn-zb--lg tw-w-full sm:tw-w-auto">Submit Enquiry <i

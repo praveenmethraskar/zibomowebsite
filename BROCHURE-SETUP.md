@@ -247,10 +247,22 @@ confirmation that anything happened.
 | Control | Behaviour |
 | --- | --- |
 | CSRF token | 32 random bytes in the session, compared with `hash_equals`, rotated after a successful send. |
-| Honeypot | A field named `website`, positioned off-screen with CSS rather than `type="hidden"` so bots still fill it. Any value discards the submission. |
+| Honeypot | A text field named `zb_hp` that is in the HTML but never rendered (`hidden`), so bots that fill every field they find trip it and people never see it. Any value discards the submission. It used to be an off-screen field called `website`, which browser autofill filled for real visitors and got their enquiries discarded. |
 | Timing check | Submissions under 3 seconds from page render are treated as automated. |
 | Rate limit | 3 accepted submissions per session per hour, tracked as timestamps in the session. Each form has its own budget, so one never blocks the other. |
+<<<<<<< HEAD
 | Select allow-list | `requirement` must match the server's own list — an edited `<option>` is rejected. |
+=======
+| Select allow-list | A chosen `requirement` must match the server's own list — an edited `<option>` is rejected. |
+
+**The contact form (`contact.php`)** uses the honeypot, rate limit and
+allow-list above, but no CSRF token or timing check: `index.html` is static,
+so there is nowhere to render a token or stamp a render time. Instead the
+endpoint refuses any POST whose `Origin` (or, failing that, `Referer`) is not
+this site — browsers always send one, simple bots usually do not. A forged
+cross-site request could only send support an enquiry, so there is nothing
+for a token to protect.
+>>>>>>> 8b742b9 (completed)
 
 **The contact form (`contact.php`)** uses the honeypot, rate limit and
 allow-list above, but no CSRF token or timing check: `index.html` is static,
@@ -264,7 +276,22 @@ No CAPTCHA, since the site does not already use one.
 
 ---
 
-## 7. Sanitisation and injection defence
+## 7. Required and optional fields
+
+On both forms only **Name** and **Phone Number** are required. Business,
+Email, Requirement, Address and Message are optional — but what is given
+must still be valid: an email must look like one, and a requirement must
+come from the list.
+
+Without an email address:
+
+- the lead email to support has no Reply-To, and its footer says to call the
+  customer on the phone number instead;
+- no brochure copy is emailed, and the success page does not promise one.
+
+---
+
+## 8. Sanitisation and injection defence
 
 - `zb_clean()` forces a string, rejects invalid UTF-8, strips C0/C1 control
   characters (including the CR/LF used for header injection), trims, and
@@ -282,7 +309,7 @@ No CAPTCHA, since the site does not already use one.
 
 ---
 
-## 8. Error handling
+## 9. Error handling
 
 Every failure shows the visitor a plain message and writes the technical
 detail to `private/zibomo-brochure.log` (configurable, outside the web root).
@@ -299,15 +326,16 @@ number and support email and keeps what the visitor typed — never a false
 
 ---
 
-## 9. Testing checklist
+## 10. Testing checklist
 
 Verified locally against PHP 8.2 with a dev server. Re-run the starred items
 on the live host after deploying.
 
 **Form**
 - [x] Brochure button opens the form page
-- [x] All required fields validated server-side
-- [x] Invalid email rejected
+- [x] Only name and phone required, on both forms, in the browser and on the server
+- [x] Name + phone alone is accepted; the lead says to call, no copy is emailed
+- [x] An optional email that is given must be valid (rejected otherwise)
 - [x] Invalid phone rejected
 - [x] CSRF: missing token rejected
 - [x] CSRF: forged token rejected

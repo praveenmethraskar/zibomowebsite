@@ -80,6 +80,7 @@ function zb_send_brochure_to_visitor(array $lead)
 {
     $config = zb_config();
 
+<<<<<<< HEAD
     $path = zb_brochure_path();
     $pdf  = $path !== false ? @file_get_contents($path) : false;
     if ($pdf === false) {
@@ -87,6 +88,20 @@ function zb_send_brochure_to_visitor(array $lead)
         return false;
     }
 
+=======
+    // Email is optional on the form: no address, nothing to send.
+    if (!filter_var($lead['email'], FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+
+    $path = zb_brochure_path();
+    $pdf  = $path !== false ? @file_get_contents($path) : false;
+    if ($pdf === false) {
+        zb_log('Brochure email not sent: the PDF could not be read.');
+        return false;
+    }
+
+>>>>>>> 8b742b9 (completed)
     $filename = preg_replace('/[^A-Za-z0-9._-]/', '', basename((string) $config['brochure_filename']));
     if ($filename === '') {
         $filename = 'zibomo-brochure.pdf';
@@ -126,11 +141,25 @@ function zb_send_notification($subject, $heading, array $rows, $submittedAt, $re
 {
     $config = zb_config();
 
+<<<<<<< HEAD
     return zb_deliver(
         $config['lead_recipient'],
         $subject,
         zb_email_text($heading, $rows, $submittedAt),
         zb_email_html($heading, $rows, $submittedAt),
+=======
+    // Email is optional on both forms. Without one there is no Reply-To,
+    // so point support at the phone number instead.
+    $note = filter_var($replyTo, FILTER_VALIDATE_EMAIL)
+        ? 'Reply directly to this email to reach the customer.'
+        : 'No email address was given — call the customer on the phone number above.';
+
+    return zb_deliver(
+        $config['lead_recipient'],
+        $subject,
+        zb_email_text($heading, $rows, $submittedAt, $note),
+        zb_email_html($heading, $rows, $submittedAt, $note),
+>>>>>>> 8b742b9 (completed)
         $replyTo,
         $replyToName
     );
@@ -495,9 +524,16 @@ function zb_encode_address($name, $address)
  * @param string $heading
  * @param array  $rows label => value
  * @param string $submittedAt
+<<<<<<< HEAD
  * @return string
  */
 function zb_email_html($heading, array $rows, $submittedAt)
+=======
+ * @param string $note        how support can reach the customer
+ * @return string
+ */
+function zb_email_html($heading, array $rows, $submittedAt, $note)
+>>>>>>> 8b742b9 (completed)
 {
     $tr = '';
     foreach ($rows as $label => $value) {
@@ -541,7 +577,7 @@ function zb_email_html($heading, array $rows, $submittedAt)
         . '<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#55617A;">'
         . 'Submitted at: <strong style="color:#10192F;">' . $submitted . '</strong></div>'
         . '<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#7C8699;margin-top:10px;">'
-        . 'Reply directly to this email to reach the customer.</div>'
+        . zb_e($note) . '</div>'
         . '</td></tr></table></body></html>';
 }
 
@@ -549,9 +585,16 @@ function zb_email_html($heading, array $rows, $submittedAt)
  * @param string $heading
  * @param array  $rows label => value
  * @param string $submittedAt
+<<<<<<< HEAD
  * @return string
  */
 function zb_email_text($heading, array $rows, $submittedAt)
+=======
+ * @param string $note        how support can reach the customer
+ * @return string
+ */
+function zb_email_text($heading, array $rows, $submittedAt, $note)
+>>>>>>> 8b742b9 (completed)
 {
     $lines = array(
         $heading,
@@ -564,6 +607,10 @@ function zb_email_text($heading, array $rows, $submittedAt)
     }
     $lines[] = '';
     $lines[] = 'Submitted At: ' . $submittedAt;
+<<<<<<< HEAD
+=======
+    $lines[] = $note;
+>>>>>>> 8b742b9 (completed)
 
     return implode("\r\n", $lines);
 }
@@ -572,7 +619,11 @@ function zb_email_text($heading, array $rows, $submittedAt)
  * The email that carries the brochure to the visitor.
  *
  * @param string $greeting    already reduced to "Hi <name>," or "Hello,"
+<<<<<<< HEAD
  * @param string $requirement one of zb_requirements()
+=======
+ * @param string $requirement one of zb_requirements(), or '' — it is optional
+>>>>>>> 8b742b9 (completed)
  * @param string $filename
  * @return string
  */
@@ -580,6 +631,13 @@ function zb_brochure_email_html($greeting, $requirement, $filename)
 {
     $p = 'font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;color:#10192F;margin:0 0 16px;';
 
+<<<<<<< HEAD
+=======
+    $followUp = $requirement !== ''
+        ? 'We have noted your interest in <strong>' . zb_e($requirement) . '</strong>, and our team will be in touch shortly.'
+        : 'Our team will be in touch shortly.';
+
+>>>>>>> 8b742b9 (completed)
     return '<!doctype html><html><head><meta charset="UTF-8">'
         . '<meta name="viewport" content="width=device-width,initial-scale=1"></head>'
         . '<body style="margin:0;padding:24px 12px;background:#F5F7FC;">'
@@ -595,8 +653,12 @@ function zb_brochure_email_html($greeting, $requirement, $filename)
         . '<p style="' . $p . '">Thank you for your interest in Zibomo. The brochure you asked for is attached '
         . 'to this email as <strong>' . zb_e($filename) . '</strong>. It covers hardware configurations, '
         . 'platform capabilities and deployment scenarios.</p>'
+<<<<<<< HEAD
         . '<p style="' . $p . '">We have noted your interest in <strong>' . zb_e($requirement) . '</strong>, '
         . 'and our team will be in touch shortly.</p>'
+=======
+        . '<p style="' . $p . '">' . $followUp . '</p>'
+>>>>>>> 8b742b9 (completed)
         . '<p style="' . $p . '">Want to talk sooner? Call <a href="tel:+919154324445" style="color:#E8112D;">'
         . '+91 9154324445</a> or simply reply to this email.</p>'
         . '<p style="' . $p . '">— Team Zibomo</p>'
@@ -623,7 +685,13 @@ function zb_brochure_email_text($greeting, $requirement, $filename)
         'Thank you for your interest in Zibomo. The brochure you asked for is attached to this email as '
             . $filename . '. It covers hardware configurations, platform capabilities and deployment scenarios.',
         '',
+<<<<<<< HEAD
         'We have noted your interest in ' . $requirement . ', and our team will be in touch shortly.',
+=======
+        $requirement !== ''
+            ? 'We have noted your interest in ' . $requirement . ', and our team will be in touch shortly.'
+            : 'Our team will be in touch shortly.',
+>>>>>>> 8b742b9 (completed)
         '',
         'Want to talk sooner? Call +91 9154324445 or simply reply to this email.',
         '',

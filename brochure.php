@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$showSuccess) {
         $formError = 'Your session expired before the form was submitted. Please try again.';
         zb_log('CSRF validation failed.');
 
-    } elseif (!empty($_POST['website'])) {
+    } elseif (!empty($_POST['zb_hp'])) {
         // Honeypot. A real visitor never sees this field.
         zb_log('Honeypot triggered — submission discarded.');
         $formError = 'We could not process your request right now. Please try again.';
@@ -84,25 +84,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$showSuccess) {
                 $errors['name'] = 'Please enter your full name.';
             }
 
-            if ($values['business'] === '') {
-                $errors['business'] = 'Please enter your business or organization name.';
-            }
-
             if ($values['phone'] === '') {
                 $errors['phone'] = 'Please enter a phone number.';
             } elseif (!zb_valid_phone($values['phone'])) {
                 $errors['phone'] = 'Please enter a valid phone number, for example +91 91212 08058.';
             }
 
-            if ($values['email'] === '') {
-                $errors['email'] = 'Please enter an email address.';
-            } elseif (!filter_var($values['email'], FILTER_VALIDATE_EMAIL)) {
+            // Only name and phone are required. The rest is optional, but
+            // what is given must still be valid.
+            if ($values['email'] !== '' && !filter_var($values['email'], FILTER_VALIDATE_EMAIL)) {
                 $errors['email'] = 'That email address does not look right.';
             }
 
-            if ($values['requirement'] === '') {
-                $errors['requirement'] = 'Please choose a requirement.';
-            } elseif (!in_array($values['requirement'], $REQUIREMENTS, true)) {
+            if ($values['requirement'] !== '' && !in_array($values['requirement'], $REQUIREMENTS, true)) {
                 // Someone edited the select. Do not pass an arbitrary value on.
                 $errors['requirement'] = 'Please choose a requirement from the list.';
             }
@@ -122,6 +116,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$showSuccess) {
                     zb_csrf_rotate();
                     unset($_SESSION['zb_form_time']);
 
+                    // Email is optional, so there is only a copy to send when
+                    // an address was given. The success page reads this flag.
+                    $emailCopy = !empty($config['email_brochure_to_visitor']) && $lead['email'] !== '';
+                    $_SESSION['brochure_copy'] = $emailCopy;
+
                     header('Location: brochure.php?sent=1', true, 303);
 
                     // The lead is safe; now email the visitor their copy. It
@@ -129,7 +128,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$showSuccess) {
                     // download. The PDF makes it a big email (a minute on a
                     // slow uplink), so the response is finished first: the
                     // visitor is on the success page while it goes out.
+<<<<<<< HEAD
                     if (!empty($config['email_brochure_to_visitor'])) {
+=======
+                    if ($emailCopy) {
+>>>>>>> 8b742b9 (completed)
                         session_write_close();
                         ignore_user_abort(true);
                         @set_time_limit(300);
@@ -226,7 +229,11 @@ $err = function ($field) use ($errors) {
             <?php else: ?>
               <p>Your brochure is ready. Press the button below to download it.</p>
             <?php endif; ?>
+<<<<<<< HEAD
             <?php if (!empty($config['email_brochure_to_visitor'])): ?>
+=======
+            <?php if (!empty($_SESSION['brochure_copy'])): ?>
+>>>>>>> 8b742b9 (completed)
               <p>We are also emailing a copy to the address you entered.</p>
             <?php endif; ?>
             <a href="download-brochure.php" class="btn-zb btn-zb--solid btn-zb--lg brochure-success__btn"
@@ -254,10 +261,11 @@ $err = function ($field) use ($errors) {
           <form method="post" action="brochure.php" class="brochure-form" id="brochureForm" novalidate>
             <input type="hidden" name="csrf_token" value="<?php echo zb_e($csrfToken); ?>">
 
-            <!-- Honeypot: hidden from people, filled in by bots. -->
-            <div class="brochure-hp" aria-hidden="true">
-              <label for="website">Website</label>
-              <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+            <!-- Honeypot: bots fill every field they find in the HTML. `hidden`
+                 keeps it away from people and from browser autofill. -->
+            <div class="brochure-hp" aria-hidden="true" hidden>
+              <label for="zbHp">Leave this empty</label>
+              <input type="text" id="zbHp" name="zb_hp" tabindex="-1" autocomplete="off">
             </div>
 
             <div class="row g-3">
@@ -272,12 +280,10 @@ $err = function ($field) use ($errors) {
               </div>
 
               <div class="col-md-6">
-                <label for="business" class="form-label">Business / Company Name <span class="req">*</span></label>
-                <input type="text" class="form-control<?php echo $err('business') ? ' is-invalid' : ''; ?>"
+                <label for="business" class="form-label">Business / Company Name <span class="opt">(optional)</span></label>
+                <input type="text" class="form-control"
                        id="business" name="business" value="<?php echo zb_e($values['business']); ?>"
-                       autocomplete="organization" required
-                       <?php echo $err('business') ? 'aria-invalid="true" aria-describedby="err-business"' : ''; ?>>
-                <?php if ($err('business')): ?><div class="invalid-feedback d-block" id="err-business"><?php echo zb_e($err('business')); ?></div><?php endif; ?>
+                       autocomplete="organization">
               </div>
 
               <div class="col-md-6">
@@ -290,18 +296,18 @@ $err = function ($field) use ($errors) {
               </div>
 
               <div class="col-md-6">
-                <label for="email" class="form-label">Email <span class="req">*</span></label>
+                <label for="email" class="form-label">Email <span class="opt">(optional)</span></label>
                 <input type="email" class="form-control<?php echo $err('email') ? ' is-invalid' : ''; ?>"
                        id="email" name="email" value="<?php echo zb_e($values['email']); ?>"
-                       autocomplete="email" required
+                       autocomplete="email"
                        <?php echo $err('email') ? 'aria-invalid="true" aria-describedby="err-email"' : ''; ?>>
                 <?php if ($err('email')): ?><div class="invalid-feedback d-block" id="err-email"><?php echo zb_e($err('email')); ?></div><?php endif; ?>
               </div>
 
               <div class="col-12">
-                <label for="requirement" class="form-label">Requirement <span class="req">*</span></label>
+                <label for="requirement" class="form-label">Requirement <span class="opt">(optional)</span></label>
                 <select class="form-select<?php echo $err('requirement') ? ' is-invalid' : ''; ?>"
-                        id="requirement" name="requirement" required
+                        id="requirement" name="requirement"
                         <?php echo $err('requirement') ? 'aria-invalid="true" aria-describedby="err-requirement"' : ''; ?>>
                   <option value="">Choose a requirement…</option>
                   <?php foreach ($REQUIREMENTS as $option): ?>

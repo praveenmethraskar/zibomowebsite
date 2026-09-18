@@ -516,16 +516,17 @@
           }
         }
 
+        // Only name and phone are required; an optional field may be left
+        // empty, but an email that is given must look like one.
         function validateField($field) {
           var val = $.trim($field.val());
           var id  = $field.attr('id');
-          var ok  = val.length > 0;
 
-          if (ok && id === 'email')   { ok = emailRe.test(val); }
-          if (ok && id === 'phone')   { ok = phoneRe.test(val); }
-          if (ok && id === 'message') { ok = val.length >= 10; }
+          if (val === '')           { return !$field.prop('required'); }
+          if (id === 'email')       { return emailRe.test(val); }
+          if (id === 'phone')       { return phoneRe.test(val); }
 
-          return ok;
+          return true;
         }
 
         // Clear the error state as soon as the visitor fixes the field.
@@ -573,7 +574,8 @@
 
           var firstBad = null;
 
-          $form.find('[required]').each(function () {
+          // Every field: optional ones pass when empty but not when malformed.
+          $form.find('.form-control, .form-select').each(function () {
             var $f = $(this);
             var ok = validateField($f);
             setInvalid($f, !ok);

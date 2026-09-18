@@ -2141,6 +2141,40 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   background-image: none;
 }
 .brochure-form .invalid-feedback { font-size: .82rem; color: var(--zb-red); margin-top: .35rem; }
+
+/* ---- Two-column form rows keep their inputs level ----
+   Shared by this form and the index.html contact form. On laptop widths a
+   long label ("Business / Company Name (optional)") wraps and would push
+   its input below its neighbour's. Each field instead spans three shared
+   rows — label, control, error message — through subgrid, so the inputs
+   line up whatever wraps, and stay lined up when only one of them shows an
+   error. Browsers without subgrid keep the normal Bootstrap flow. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 768px) {
+    .brochure-form > .row,
+    .contact-form > .row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .brochure-form > .row > *,
+    .contact-form > .row > * {
+      display: grid;
+      grid-row: span 3;
+      grid-template-rows: subgrid;
+      width: auto;
+    }
+    .brochure-form > .row > .col-12,
+    .contact-form > .row > .col-12 { grid-column: 1 / -1; }
+
+    /* A one-line label sits just above its input, not at the top of a
+       taller neighbour's space. */
+    .brochure-form > .row > * > .form-label,
+    .contact-form > .row > * > .form-label { align-self: end; }
+
+    /* Grid items stretch; the contact button keeps its own width. */
+    .contact-form [type="submit"] { justify-self: start; }
+  }
+}
 .brochure-form textarea.form-control { resize: vertical; min-height: 110px; }
 
 /* ---- Alert ---- */
@@ -2161,6 +2195,7 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   color: #9B1024;
 }
 
+<<<<<<< HEAD
 /* ---- Honeypot: off-screen, not display:none, so bots still fill it.
         .form-hp is the same field on the index.html contact form. ---- */
 .brochure-hp,
@@ -2171,6 +2206,16 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   width: 1px; height: 1px;
   overflow: hidden;
 }
+=======
+/* ---- Honeypot: not rendered at all. Off-screen positioning let browser
+        autofill fill it for real visitors, whose enquiries were then
+        discarded as spam; bots read the field from the HTML either way.
+        The markup also carries `hidden`, so this holds even on a stale
+        stylesheet. .form-hp is the same field on the index.html contact
+        form. ---- */
+.brochure-hp,
+.form-hp { display: none !important; }
+>>>>>>> 8b742b9 (completed)
 
 /* ---- Submit ---- */
 .brochure-submit { width: 100%; justify-content: center; }
