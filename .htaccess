@@ -1,0 +1,15 @@
+# .env holds the mail password. Refuse every request for it (and for
+# .env.example) so it can never be downloaded from the site.
+#
+# NOTE: .htaccess is an Apache / LiteSpeed feature. On nginx this file is
+# ignored — put .env one level above the web root instead; the site reads
+# it from there too (see includes/bootstrap.php).
+<FilesMatch "^\.env">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

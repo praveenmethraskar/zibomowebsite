@@ -1262,6 +1262,17 @@ img { max-width: 100%; height: auto; }
 }
 .gallery-card--video figcaption { inset: 0 0 auto; padding: .95rem 1.1rem; }
 
+/* ---- Wide (landscape) video tile ----
+   A 16:9 clip gets the feature photo's footprint. In the portrait tile it
+   would sit letterboxed in a tall navy box that overhangs the grid by two
+   rows. It stays contained rather than cropped: the rows cannot make a
+   16:9 cell at every width, and cropping cuts the signage the clip is
+   there to show — any spare space falls back to the card's navy. */
+.gallery-card--video.gallery-card--wide {
+  grid-column: span 8;
+  grid-row: span 2;
+}
+
 
 /* ========================================================================== 
    17. COLLABORATION
@@ -1514,6 +1525,9 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
 .form-status.is-error   { background: rgba(220, 53, 69, .1);  color: #b02a37; }
 .form-status a          { color: inherit; font-weight: 600; text-decoration: underline; }
 
+/* While the enquiry is being sent — set by main.js */
+.contact-form [type="submit"][disabled] { opacity: .75; cursor: progress; }
+
 
 /* ==========================================================================
    21. FOOTER
@@ -1687,7 +1701,10 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   .gallery-grid { grid-auto-rows: 190px; }
   .gallery-card { grid-column: span 6; }
   .gallery-card--feature { grid-column: span 12; }
-  .gallery-card--video   { grid-column: span 6; grid-row: span 3; }
+  /* Two rows, not three, so the two photos beside the portrait clip fill
+     its height and the full-width wide video starts on a clean row. */
+  .gallery-card--video   { grid-column: span 6; grid-row: span 2; }
+  .gallery-card--video.gallery-card--wide { grid-column: span 12; grid-row: span 2; }
 }
 
 /* ---- Mobile ---- */
@@ -1741,6 +1758,7 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   .gallery-card,
   .gallery-card--feature { grid-column: auto; grid-row: auto; }
   .gallery-card--video   { grid-column: auto; grid-row: span 3; }
+  .gallery-card--video.gallery-card--wide { grid-column: auto; grid-row: auto; }
 }
 
 
@@ -2142,8 +2160,10 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   color: #9B1024;
 }
 
-/* ---- Honeypot: off-screen, not display:none, so bots still fill it ---- */
-.brochure-hp {
+/* ---- Honeypot: off-screen, not display:none, so bots still fill it.
+        .form-hp is the same field on the index.html contact form. ---- */
+.brochure-hp,
+.form-hp {
   position: absolute !important;
   left: -9999px !important;
   top: auto;

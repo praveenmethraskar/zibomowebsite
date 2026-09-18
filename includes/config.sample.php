@@ -1,6 +1,6 @@
 <?php
 /**
- * Zibomo — brochure lead-capture configuration (TEMPLATE).
+ * Zibomo — brochure and contact form configuration (TEMPLATE).
  *
  * Copy this file to includes/config.php and fill in the real values.
  *
@@ -13,34 +13,45 @@
 return array(
 
     /* ---------------------------------------------------------------
-       Where the lead notification goes
+       Where both forms' notifications go
+       Env: ZIBOMO_LEAD_RECIPIENT
        --------------------------------------------------------------- */
-    'lead_recipient' => 'support@zibomo.in',
-    'lead_subject'   => 'New Zibomo Brochure Download Request',
+    'lead_recipient'  => 'support@zibomo.in',
+    'lead_subject'    => 'New Zibomo Brochure Download Request',
+    'contact_subject' => 'New Zibomo Contact Enquiry',
 
     /* ---------------------------------------------------------------
-       Envelope sender.
-       This MUST be a real mailbox on a domain whose DNS (SPF/DKIM)
-       authorises this server to send. Using a visitor's address here
-       is what gets mail rejected or junked — the visitor goes in
-       Reply-To instead, which this code does automatically.
+       Sender used by mail(). The visitor goes in Reply-To, so support
+       can answer them directly.
+       Env: ZIBOMO_MAIL_FROM
        --------------------------------------------------------------- */
     'mail_from'      => 'no-reply@zibomo.in',
     'mail_from_name' => 'Zibomo Website',
 
     /* ---------------------------------------------------------------
-       Transport: 'smtp' (recommended) or 'mail' (last resort).
-       See includes/mail.php for why smtp matters.
+       How mail is sent.
+         'mail' — PHP's mail(), no password needed. If it fails (XAMPP
+                  on Windows has no mail server), the Gmail account
+                  below is used instead.
+         'smtp' — always use the Gmail account below. Use this if
+                  mail() says it sent on the live server but nothing
+                  arrives in the inbox.
        Env: ZIBOMO_MAIL_TRANSPORT
        --------------------------------------------------------------- */
-    'mail_transport' => 'smtp',
+    'mail_transport' => 'mail',
 
+    /* ---------------------------------------------------------------
+       Gmail account used when mail() cannot send. The password is a
+       Google App Password (Google Account → Security → App passwords),
+       not the account's normal password. Mail sent this way comes from
+       this address.
+       --------------------------------------------------------------- */
     'smtp' => array(
-        'host'       => 'smtp.hostinger.com',   // Env: ZIBOMO_SMTP_HOST
-        'port'       => 465,                    // Env: ZIBOMO_SMTP_PORT
-        'encryption' => 'ssl',                  // 'ssl' for 465, 'tls' for 587
-        'username'   => 'support@zibomo.in',    // Env: ZIBOMO_SMTP_USERNAME
-        'password'   => '',                     // Env: ZIBOMO_SMTP_PASSWORD  <- leave blank here, set the env var
+        'host'       => 'smtp.gmail.com',  // Env: ZIBOMO_SMTP_HOST
+        'port'       => 465,               // Env: ZIBOMO_SMTP_PORT
+        'encryption' => 'ssl',             // 'ssl' for 465, 'tls' for 587      Env: ZIBOMO_SMTP_ENCRYPTION
+        'username'   => 'zibomodigilocker@gmail.com',                // the Gmail address                 Env: ZIBOMO_SMTP_USERNAME
+        'password'   => '',                // set ZIBOMO_SMTP_PASSWORD in .env — never put it here  Env: ZIBOMO_SMTP_PASSWORD
         'timeout'    => 20,
     ),
 
@@ -68,8 +79,17 @@ return array(
     ),
     'brochure_filename' => 'zibomo-brochure.pdf',
 
+    // Also email the PDF to the address the visitor entered (Reply-To is
+    // lead_recipient, so their replies reach support).
+    'email_brochure_to_visitor' => true,
+    'brochure_email_subject'    => 'Your Zibomo Smart Locker Brochure',
+
+    // How long after a successful request the download link keeps working.
+    'download_window_minutes' => 30,
+
     /* ---------------------------------------------------------------
-       Anti-spam (no database, all session based)
+       Anti-spam (no database, all session based).
+       The hourly cap applies to each form separately.
        --------------------------------------------------------------- */
     'max_submissions_per_hour' => 3,
     'min_seconds_on_form'      => 3,

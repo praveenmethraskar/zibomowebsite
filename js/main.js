@@ -21,7 +21,7 @@
      12 .. Video modal
      13 .. Back to top
      14 .. Magnetic buttons
-     15 .. Contact form validation
+     15 .. Contact form (posts to contact.php)
      16 .. Locations map
    ========================================================================== */
 
@@ -487,16 +487,22 @@
 
 
       /* ==================================================================
-         15. CONTACT FORM VALIDATION
-         Client-side only — this is a static build with no backend. The
-         success path says so explicitly rather than implying the message
-         was delivered, and points at the real phone/email instead.
+         15. CONTACT FORM
+         Validated here, then posted to contact.php, which emails the
+         enquiry to support@zibomo.in and answers in JSON. The
+         server repeats every check; these only save a round trip. Where
+         PHP is not running (the GitHub Pages build) the post fails, and
+         the visitor is pointed at the phone number and email instead —
+         never told a message was sent when it was not.
          ================================================================== */
       (function initContactForm() {
         var $form   = $('#contactForm');
         if (!$form.length) { return; }
 
-        var $status = $('#formStatus');
+        var $status    = $('#formStatus');
+        var $submit    = $form.find('[type="submit"]');
+        var submitHtml = $submit.html();
+        var sending    = false;
 
         var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
         var phoneRe = /^[+\d][\d\s\-().]{7,19}$/;
@@ -530,8 +536,40 @@
           }
         });
 
+        function showStatus(kind, html) {
+          $status
+            .removeClass('is-ok is-error')
+            .addClass('is-shown is-' + kind)
+            .html(html);
+        }
+
+        // Plain text from the server, escaped before it touches the DOM.
+        function showText(kind, text) {
+          showStatus(kind, $('<div>').text(text).html());
+        }
+
+        function showUnavailable() {
+          showStatus('error',
+            '<strong>We could not send your message just now.</strong><br>' +
+            'Please try again in a moment, or reach the team directly on ' +
+            '<a href="tel:+919154324445">+91 9154324445</a> or ' +
+            '<a href="mailto:support@zibomo.in">support@zibomo.in</a>.'
+          );
+        }
+
+        function setSending(on) {
+          sending = on;
+          $submit.prop('disabled', on);
+          if (on) {
+            $submit.attr('aria-busy', 'true').text('Sending…');
+          } else {
+            $submit.removeAttr('aria-busy').html(submitHtml);
+          }
+        }
+
         $form.on('submit', function (e) {
           e.preventDefault();
+          if (sending) { return; }
 
           var firstBad = null;
 
@@ -543,31 +581,62 @@
           });
 
           if (firstBad) {
-            $status
-              .removeClass('is-ok')
-              .addClass('is-shown is-error')
-              .html('Please correct the highlighted fields and try again.');
+            showStatus('error', 'Please correct the highlighted fields and try again.');
             firstBad.trigger('focus');
             return;
           }
 
-          /* ----------------------------------------------------------------
-             NO BACKEND IS WIRED UP. To make this form actually deliver mail,
-             POST the values to your endpoint (or a form service) here — e.g.
-                 $.post('https://your-endpoint.example/contact', $form.serialize())
-             and replace the notice below with a real confirmation.
-             ---------------------------------------------------------------- */
-          $status
-            .removeClass('is-error')
-            .addClass('is-shown is-ok')
-            .html(
-              '<strong>All set — your details look good.</strong><br>' +
-              'This is a static build with no server attached, so nothing was sent. ' +
-              'Reach the team directly on <a href="tel:+919121208058">+91 9121208058</a> ' +
-              'or <a href="mailto:support@zibomo.in">support@zibomo.in</a>.'
-            );
+          setSending(true);
+          $status.removeClass('is-shown is-ok is-error').empty();
 
-          $form.find('.form-control, .form-select').removeClass('is-invalid field-shake');
+          $.ajax({
+            url: $form.attr('action'),
+            method: 'POST',
+            data: $form.serialize(),
+            dataType: 'json',
+            timeout: 30000
+          })
+            .done(function (res) {
+              if (!res || res.ok !== true) {
+                showUnavailable();
+                return;
+              }
+              showStatus('ok',
+                '<strong>Thank you — your enquiry has reached our team.</strong><br>' +
+                'We will get back to you shortly. For anything urgent, call ' +
+                '<a href="tel:+919154324445">+91 9154324445</a>.'
+              );
+              $form[0].reset();
+              $form.find('.form-control, .form-select').removeClass('is-invalid field-shake');
+            })
+            .fail(function (xhr) {
+              var res = xhr.responseJSON;
+
+              // The server disagreed with a field the checks above passed.
+              if (res && res.errors) {
+                var bad = null;
+                $.each(res.errors, function (name) {
+                  var $f = $($form[0].elements[name]);
+                  if (!$f.length) { return; }
+                  setInvalid($f, true);
+                  if (!bad) { bad = $f; }
+                });
+                showText('error', res.message || 'Please correct the highlighted fields and try again.');
+                if (bad) { bad.trigger('focus'); }
+                return;
+              }
+
+              if (xhr.status === 429 && res && res.message) {
+                showText('error', res.message);
+                return;
+              }
+
+              // Mail failure, no PHP on this host, offline or timed out.
+              showUnavailable();
+            })
+            .always(function () {
+              setSending(false);
+            });
         });
       }());
 

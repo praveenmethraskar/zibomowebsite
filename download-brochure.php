@@ -6,9 +6,9 @@
  * session. The file itself lives outside the web root (see config), so
  * this script is the only route to it.
  *
- * The permission is consumed after a complete stream. If the transfer is
- * aborted the script dies before that point, which leaves the permission
- * in place so the visitor can retry — that is deliberate.
+ * The permission lasts 'download_window_minutes' from the moment the lead
+ * email was accepted, so the success page's automatic download and its
+ * fallback button can both be used within that window.
  */
 
 require_once __DIR__ . '/includes/bootstrap.php';
@@ -18,10 +18,15 @@ zb_session_start();
 /* ------------------------------------------------------------------
    1. Permission
    ------------------------------------------------------------------ */
-if (empty($_SESSION['brochure_access'])) {
+if (!zb_brochure_access_ok()) {
     header('Location: brochure.php', true, 303);
     exit;
 }
+
+// Nothing below writes to the session, so release its lock now instead of
+// holding it for the whole transfer — a second click would otherwise queue
+// behind the automatic download.
+session_write_close();
 
 /* ------------------------------------------------------------------
    2. The file
@@ -47,7 +52,7 @@ if ($real === false) {
        . '<h1>The brochure is temporarily unavailable</h1>'
        . '<p>Your request reached us. We could not attach the file just now &mdash; '
        . 'email <a href="mailto:support@zibomo.in">support@zibomo.in</a> '
-       . 'or call <a href="tel:+919121208058">+91 9121208058</a> and we will send it straight over.</p>'
+       . 'or call <a href="tel:+919154324445">+91 9154324445</a> and we will send it straight over.</p>'
        . '<p><a href="index.html">Back to the Zibomo site</a></p>'
        . '</div></body></html>';
     exit;
@@ -108,9 +113,4 @@ while (!feof($handle)) {
     flush();
 }
 fclose($handle);
-
-/* ------------------------------------------------------------------
-   4. Consume the permission
-   ------------------------------------------------------------------ */
-unset($_SESSION['brochure_access']);
 exit;

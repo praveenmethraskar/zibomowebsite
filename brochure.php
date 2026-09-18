@@ -21,16 +21,7 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 
 $config = zb_config();
 
-$REQUIREMENTS = array(
-    'Business / Corporate lockers',
-    'Gated community lockers',
-    'Convention / Event lockers',
-    'Temple / Public storage lockers',
-    'Transport / Luggage lockers',
-    'Laundry / Parcel lockers',
-    'Product & software demo',
-    'Other',
-);
+$REQUIREMENTS = zb_requirements();
 
 $values = array(
     'name' => '', 'business' => '', 'phone' => '', 'email' => '',
@@ -39,11 +30,16 @@ $values = array(
 $errors      = array();
 $formError   = '';
 $showSuccess = false;
+$autoStart   = false;
 
 /* Success state is reached by redirect after a successful send, so a
    refresh cannot resubmit the form. */
-if (isset($_GET['sent']) && !empty($_SESSION['brochure_access'])) {
+if (isset($_GET['sent']) && zb_brochure_access_ok()) {
     $showSuccess = true;
+
+    // Start the download on the first view only, not on every refresh.
+    $autoStart = !empty($_SESSION['brochure_autostart']);
+    unset($_SESSION['brochure_autostart']);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$showSuccess) {
@@ -122,11 +118,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$showSuccess) {
                     zb_rate_limit_hit();
 
                     // The permission is granted here and nowhere else.
-                    $_SESSION['brochure_access'] = true;
+                    zb_brochure_grant();
                     zb_csrf_rotate();
                     unset($_SESSION['zb_form_time']);
 
                     header('Location: brochure.php?sent=1', true, 303);
+
+                    // The lead is safe; now email the visitor their copy. It
+                    // is best effort — a failure never costs them the
+                    // download. The PDF makes it a big email (a minute on a
+                    // slow uplink), so the response is finished first: the
+                    // visitor is on the success page while it goes out.
+                    if (!empty($config['email_brochure_to_visitor'])) {
+                        session_write_close();
+                        ignore_user_abort(true);
+                        @set_time_limit(300);
+                        zb_finish_response();
+                        if (!zb_send_brochure_to_visitor($lead)) {
+                            zb_log('The brochure could not be emailed to the visitor; their download is unaffected.');
+                        }
+                    }
                     exit;
                 }
 
@@ -137,22 +148,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$showSuccess) {
                 $formError = 'Please correct the highlighted fields and try again.';
             }
         }
-    }
-}
-
-/**
- * Submission timestamp in the site's timezone.
- *
- * @return string
- */
-function zb_submitted_at()
-{
-    $tz = 'Asia/Kolkata';
-    try {
-        $now = new DateTime('now', new DateTimeZone($tz));
-        return $now->format('j F Y, g:i A') . ' IST';
-    } catch (Exception $e) {
-        return gmdate('j F Y, g:i A') . ' UTC';
     }
 }
 
@@ -211,7 +206,7 @@ $err = function ($field) use ($errors) {
 
           <div class="brochure-contact">
             <p>Prefer to talk first?</p>
-            <a href="tel:+919121208058"><i class="bi bi-telephone"></i> +91 9121208058</a>
+            <a href="tel:+919154324445"><i class="bi bi-telephone"></i> +91 9154324445</a>
             <a href="mailto:support@zibomo.in"><i class="bi bi-envelope"></i> support@zibomo.in</a>
           </div>
         </div>
@@ -226,13 +221,21 @@ $err = function ($field) use ($errors) {
           <div class="brochure-success" role="status">
             <span class="brochure-success__icon"><i class="bi bi-check-lg"></i></span>
             <h2>Thank you — your details are with us.</h2>
-            <p>Your brochure is ready. The download starts when you press the button below.</p>
-            <a href="download-brochure.php" class="btn-zb btn-zb--solid btn-zb--lg brochure-success__btn">
+            <?php if ($autoStart): ?>
+              <p>Your brochure download will start automatically. If it does not begin within a few seconds, press the button below.</p>
+            <?php else: ?>
+              <p>Your brochure is ready. Press the button below to download it.</p>
+            <?php endif; ?>
+            <?php if (!empty($config['email_brochure_to_visitor'])): ?>
+              <p>We are also emailing a copy to the address you entered.</p>
+            <?php endif; ?>
+            <a href="download-brochure.php" class="btn-zb btn-zb--solid btn-zb--lg brochure-success__btn"
+               id="brochureDownload"<?php echo $autoStart ? ' data-autostart' : ''; ?>>
               <i class="bi bi-download"></i> Download the brochure
             </a>
             <p class="brochure-success__note">
-              This link works once. If the download does not start, press the button again
-              or email <a href="mailto:support@zibomo.in">support@zibomo.in</a> and we will send it over.
+              The download link stays active for <?php echo (int) $config['download_window_minutes']; ?> minutes.
+              Trouble downloading? Email <a href="mailto:support@zibomo.in">support@zibomo.in</a> and we will send it over.
             </p>
           </div>
 
@@ -350,6 +353,14 @@ $err = function ($field) use ($errors) {
 </footer>
 
 <script>
+/* Success page: start the download without a second click. The response is
+   an attachment, so the browser saves the file and stays on this page. */
+(function () {
+  var link = document.getElementById('brochureDownload');
+  if (!link || !link.hasAttribute('data-autostart')) { return; }
+  setTimeout(function () { window.location.href = link.href; }, 900);
+}());
+
 /* Loading state. Native validation runs first so the button is never
    disabled on a form the browser is about to reject. */
 (function () {

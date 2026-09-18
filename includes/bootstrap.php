@@ -1,12 +1,13 @@
 <?php
 /**
- * Zibomo — shared bootstrap for the brochure lead-capture flow.
+ * Zibomo — shared bootstrap for the brochure and contact forms.
  *
  * Session handling, configuration, CSRF, sanitisation and logging.
- * Included by brochure.php and download-brochure.php.
+ * Included by brochure.php, download-brochure.php and contact.php.
  *
  * No database. Nothing about a visitor is written to disk; the only
- * persisted state is a session flag granting one brochure download.
+ * persisted state is a session timestamp granting brochure downloads
+ * for a short window.
  */
 
 if (!defined('ZB_ROOT')) {
@@ -38,19 +39,23 @@ function zb_config()
     $config += array(
         'lead_recipient'           => 'support@zibomo.in',
         'lead_subject'             => 'New Zibomo Brochure Download Request',
+        'contact_subject'          => 'New Zibomo Contact Enquiry',
         'mail_from'                => 'no-reply@zibomo.in',
         'mail_from_name'           => 'Zibomo Website',
         'mail_transport'           => 'mail',
         'smtp'                     => array(),
         'brochure_path'            => ZB_ROOT . '/assets/zibomo-brochure.pdf',
         'brochure_filename'        => 'zibomo-brochure.pdf',
+        'email_brochure_to_visitor' => true,
+        'brochure_email_subject'   => 'Your Zibomo Smart Locker Brochure',
+        'download_window_minutes'  => 30,
         'max_submissions_per_hour' => 3,
         'min_seconds_on_form'      => 3,
         'error_log'                => '',
     );
 
-    // Environment variables override the file, so credentials never need
-    // to live in source control.
+    // Environment variables — real ones, or lines in a .env file — override
+    // the file, so credentials never need to live in source control.
     $env = array(
         'ZIBOMO_MAIL_TRANSPORT' => 'mail_transport',
         'ZIBOMO_LEAD_RECIPIENT' => 'lead_recipient',
@@ -59,27 +64,95 @@ function zb_config()
         'ZIBOMO_ERROR_LOG'      => 'error_log',
     );
     foreach ($env as $var => $key) {
-        $val = getenv($var);
+        $val = zb_env($var);
         if ($val !== false && $val !== '') {
             $config[$key] = $val;
         }
     }
 
+    if (!is_array($config['smtp'])) {
+        $config['smtp'] = array();
+    }
     $smtpEnv = array(
-        'ZIBOMO_SMTP_HOST'     => 'host',
-        'ZIBOMO_SMTP_PORT'     => 'port',
-        'ZIBOMO_SMTP_USERNAME' => 'username',
-        'ZIBOMO_SMTP_PASSWORD' => 'password',
+        'ZIBOMO_SMTP_HOST'       => 'host',
+        'ZIBOMO_SMTP_PORT'       => 'port',
         'ZIBOMO_SMTP_ENCRYPTION' => 'encryption',
+        'ZIBOMO_SMTP_USERNAME'   => 'username',
+        'ZIBOMO_SMTP_PASSWORD'   => 'password',
     );
     foreach ($smtpEnv as $var => $key) {
-        $val = getenv($var);
+        $val = zb_env($var);
         if ($val !== false && $val !== '') {
             $config['smtp'][$key] = $val;
         }
     }
 
     return $config;
+}
+
+/**
+ * One setting from the environment: a real environment variable if the
+ * host sets one, otherwise the same name in a .env file.
+ *
+ * @param string $name
+ * @return string|false
+ */
+function zb_env($name)
+{
+    $val = getenv($name);
+    if ($val !== false && $val !== '') {
+        return $val;
+    }
+    $file = zb_dotenv();
+    return isset($file[$name]) ? $file[$name] : false;
+}
+
+/**
+ * KEY=VALUE lines from .env, read once. Blank lines and # comments are
+ * skipped and surrounding quotes removed; nothing is expanded.
+ *
+ * Two places are read. The project's own .env is blocked from the web by
+ * the root .htaccess, but that is an Apache/LiteSpeed feature, so a .env
+ * one level above the web root — which no URL can reach on any server —
+ * is read as well and wins where both set a value.
+ *
+ * @return array
+ */
+function zb_dotenv()
+{
+    static $vars = null;
+    if ($vars !== null) {
+        return $vars;
+    }
+
+    $vars = array();
+    foreach (array(ZB_ROOT . '/.env', dirname(ZB_ROOT) . '/.env') as $file) {
+        if (!is_file($file) || !is_readable($file)) {
+            continue;
+        }
+        $lines = file($file, FILE_IGNORE_NEW_LINES);
+        if ($lines === false) {
+            continue;
+        }
+        foreach ($lines as $i => $line) {
+            if ($i === 0) {
+                // Notepad may save a UTF-8 byte order mark.
+                $line = preg_replace('/^\xEF\xBB\xBF/', '', $line);
+            }
+            $line = trim($line);
+            if ($line === '' || $line[0] === '#' || strpos($line, '=') === false) {
+                continue;
+            }
+            list($key, $value) = explode('=', $line, 2);
+            $key   = trim(preg_replace('/^export\s+/', '', trim($key)));
+            $value = trim($value);
+            if (strlen($value) >= 2 && ($value[0] === '"' || $value[0] === "'") && substr($value, -1) === $value[0]) {
+                $value = substr($value, 1, -1);
+            }
+            $vars[$key] = $value;
+        }
+    }
+    return $vars;
 }
 
 /**
@@ -110,6 +183,103 @@ function zb_brochure_path()
         }
     }
     return false;
+}
+
+/**
+ * Hand the response to the visitor now and let the script carry on
+ * without them waiting. PHP-FPM and LiteSpeed have a call for this;
+ * elsewhere (Apache's mod_php, XAMPP) an empty body with Content-Length: 0
+ * lets the browser finish while the script keeps running. Only for
+ * responses with no body, such as a redirect.
+ */
+function zb_finish_response()
+{
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+        return;
+    }
+    if (function_exists('litespeed_finish_request')) {
+        litespeed_finish_request();
+        return;
+    }
+
+    // Compression would put bytes after a declared length of zero.
+    @ini_set('zlib.output_compression', 'Off');
+    header('Content-Length: 0');
+    header('Connection: close');
+    while (ob_get_level() > 0) {
+        ob_end_flush();
+    }
+    flush();
+}
+
+/**
+ * Let this session download the brochure. Called in exactly one place:
+ * straight after the lead email was accepted.
+ */
+function zb_brochure_grant()
+{
+    $_SESSION['brochure_access'] = time();
+    // The success page starts the download itself, once per grant.
+    $_SESSION['brochure_autostart'] = true;
+}
+
+/**
+ * Whether this session may download the brochure.
+ *
+ * The permission is a timestamp rather than a single-use flag so that the
+ * success page's automatic download and its fallback button both work.
+ *
+ * @return bool
+ */
+function zb_brochure_access_ok()
+{
+    $grantedAt = isset($_SESSION['brochure_access']) ? $_SESSION['brochure_access'] : 0;
+    if (!is_int($grantedAt) || $grantedAt <= 0) {
+        return false;
+    }
+    $config = zb_config();
+    return (time() - $grantedAt) < ((int) $config['download_window_minutes'] * 60);
+}
+
+/* ------------------------------------------------------------------
+   Shared form data
+   ------------------------------------------------------------------ */
+
+/**
+ * The requirement options both forms offer. Submitted values are checked
+ * against this list so an edited <option> cannot pass arbitrary text on.
+ *
+ * @return array
+ */
+function zb_requirements()
+{
+    return array(
+        'Business / Corporate lockers',
+        'Gated community lockers',
+        'Convention / Event lockers',
+        'Temple / Public storage lockers',
+        'Transport / Luggage lockers',
+        'Laundry / Parcel lockers',
+        'Product & software demo',
+        'Other',
+    );
+}
+
+/**
+ * Submission timestamp in the site's timezone.
+ *
+ * @return string
+ */
+function zb_submitted_at()
+{
+    $tz = 'Asia/Kolkata';
+    try {
+        $now = new DateTime('now', new DateTimeZone($tz));
+        return $now->format('j F Y, g:i A') . ' IST';
+    } catch (Exception $e) {
+        return gmdate('j F Y, g:i A') . ' UTC';
+    }
 }
 
 /* ------------------------------------------------------------------
@@ -192,6 +362,35 @@ function zb_csrf_validate($submitted)
         return false;
     }
     return hash_equals($_SESSION['zb_csrf'], $submitted);
+}
+
+/**
+ * The static contact form cannot carry a CSRF token, so its endpoint
+ * checks where the POST came from instead. Browsers send Origin on every
+ * scripted POST; Referer covers the rare one that does not. A request with
+ * neither did not come from a page on this site.
+ *
+ * @return bool
+ */
+function zb_same_origin()
+{
+    $host = isset($_SERVER['HTTP_HOST']) ? strtolower($_SERVER['HTTP_HOST']) : '';
+    if ($host === '') {
+        return false;
+    }
+
+    foreach (array('HTTP_ORIGIN', 'HTTP_REFERER') as $header) {
+        if (empty($_SERVER[$header])) {
+            continue;
+        }
+        $parts = parse_url($_SERVER[$header]);
+        if (!is_array($parts) || empty($parts['host'])) {
+            return false;
+        }
+        $source = strtolower($parts['host']) . (isset($parts['port']) ? ':' . $parts['port'] : '');
+        return $source === $host;
+    }
+    return false;
 }
 
 /**
@@ -320,9 +519,13 @@ function zb_valid_phone($phone)
    ------------------------------------------------------------------ */
 
 /**
+ * Each form has its own bucket, so requesting the brochure never uses up
+ * a visitor's contact enquiries or the other way round.
+ *
+ * @param string $bucket session key holding the timestamps
  * @return bool true when the visitor is under the hourly cap
  */
-function zb_rate_limit_ok()
+function zb_rate_limit_ok($bucket = 'zb_hits')
 {
     $config = zb_config();
     $max = (int) $config['max_submissions_per_hour'];
@@ -331,25 +534,27 @@ function zb_rate_limit_ok()
     }
 
     $now = time();
-    $hits = isset($_SESSION['zb_hits']) && is_array($_SESSION['zb_hits'])
-        ? $_SESSION['zb_hits']
+    $hits = isset($_SESSION[$bucket]) && is_array($_SESSION[$bucket])
+        ? $_SESSION[$bucket]
         : array();
 
     $hits = array_values(array_filter($hits, function ($t) use ($now) {
         return is_int($t) && ($now - $t) < 3600;
     }));
-    $_SESSION['zb_hits'] = $hits;
+    $_SESSION[$bucket] = $hits;
 
     return count($hits) < $max;
 }
 
 /**
  * Record a submission attempt against the hourly cap.
+ *
+ * @param string $bucket session key holding the timestamps
  */
-function zb_rate_limit_hit()
+function zb_rate_limit_hit($bucket = 'zb_hits')
 {
-    if (!isset($_SESSION['zb_hits']) || !is_array($_SESSION['zb_hits'])) {
-        $_SESSION['zb_hits'] = array();
+    if (!isset($_SESSION[$bucket]) || !is_array($_SESSION[$bucket])) {
+        $_SESSION[$bucket] = array();
     }
-    $_SESSION['zb_hits'][] = time();
+    $_SESSION[$bucket][] = time();
 }

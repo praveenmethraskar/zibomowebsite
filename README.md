@@ -53,6 +53,8 @@ How It Works · Collaboration · Clients · Contact · Footer
   whole of `main.js` is wrapped so that any exception removes that class — a broken
   script degrades to a full static page rather than a blank one.
 - **`prefers-reduced-motion`** is honoured throughout.
-- **The contact form has no backend.** It validates client-side and says so plainly
-  instead of implying a message was sent. To wire it up, POST from the marked hook in
-  module 15 of `js/main.js`.
+- **The contact form posts to `contact.php`**, which emails the enquiry to
+  support@zibomo.in with PHP's `mail()`, or through a Gmail account when `mail()` cannot
+  send. It needs PHP hosting: where PHP is not running
+  (the GitHub Pages build, `python3 -m http.server`) the form says it could not send and
+  offers the phone number and email instead. Setup is in `BROCHURE-SETUP.md`.
