@@ -1832,7 +1832,8 @@ a.info-row:hover .info-row__icon { transform: rotate(-10deg) scale(1.06); }
   color: var(--zb-body);
   padding: 0 24px 24px;
   line-height: 1.75;
-  max-width: 72ch;
+  max-width: 100%;
+  text-align: justify;
 }
 
 @media (max-width: 575.98px) {
